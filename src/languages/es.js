@@ -30,6 +30,7 @@ export default {
       phone: 'Número de celular',
       phonePlaceholder: 'Ej: 123456789',
       birthDate: 'Fecha de nacimiento',
+      birthDatePlaceholder: 'Selecciona la fecha',
       gender: 'Género',
       email: 'Correo electrónico',
       emailPlaceholder: 'Ej: juan.perez@example.com',

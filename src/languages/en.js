@@ -30,6 +30,7 @@ export default {
       phone: 'Phone number',
       phonePlaceholder: 'E.g. 123456789',
       birthDate: 'Date of birth',
+      birthDatePlaceholder: 'Select the date',
       gender: 'Gender',
       email: 'Email',
       emailPlaceholder: 'E.g. john.smith@example.com',
