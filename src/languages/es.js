@@ -15,6 +15,14 @@ export default {
   },
   registration: {
     title: 'Registro de conductor',
+    tabsShort: {
+      personal: 'Datos',
+      vehicle: 'Vehículo',
+      documents: 'Documentos',
+    },
+    stepsCompleted: 'pasos completos',
+    submittedTitle: 'Registro enviado',
+    submittedMessage: 'Tu cuenta quedó pendiente de aprobación.',
     tabs: {
       personal: 'Datos personales',
       vehicle: 'Vehículo',

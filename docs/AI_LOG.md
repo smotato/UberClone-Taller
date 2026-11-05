@@ -140,7 +140,24 @@ se habian creado manualmente en un momento anterior.
 - Objetivo: Obtener un ejemplo de validación de un campo (nombre completo), revisar el diseño visual de las pestañas de registro y definir dónde ubicar el botón "Enviar registro"
 - Prompt: "dame un ejemplo de como agregar validación a un campo, pasame las lineas exactas de ese ejemplo y donde irian, además de como usaría el registrationContext; Por último quiero que valides el diseño, si te parece bien o no, si se puede mejorar en cuanto a lo visual el tema y dime donde podría ir visualmente el botón de enviar registro."
 - Resumen de la respuesta: Se entregó el ejemplo completo para "Nombre completo": validador puro validateFullName en utils/validators.js que devuelve claves de traducción, clave nueva errors.nameTooLong en es/en, se guía en la creación de RegistrationContext (datos, touched, errores derivados con useMemo y validez por pestaña), y los cambios en PersonalDataScreen (value, onChangeText, onBlur, borde y mensaje de error). Se revisó el diseño (teclado que tapa campos, cabecera repetida, pestañas sin etiquetas, foto de perfil circular, estados de input, contraste) y se propuso una barra fija "Enviar registro" encima de la barra de pestañas mediante la prop tabBar del navegador.
-- Qué se usó / modificó / descartó: [completar: qué partes del ejemplo se implementaron, cuáles se adaptaron y cuáles se dejaron para después]
-- Archivos y commit: src/utils/validators.js, src/context/RegistrationContext.js — Hash: [completar]
+- Qué se usó / modificó / descartó: se usó el archivo de validators.js y se tomo como guía de ejemplo el resgitrationContext.js que dió claude como respuesta.
+- Archivos y commit: src/utils/validators.js, src/context/RegistrationContext.js — Hash: ffdd854
 - Verificación: probado en Expo Go que el error aparece solo tras salir del campo con números, más de 50 caracteres y vacío, y que desaparece con un nombre válido
 - Aprendizaje: los errores se derivan del estado en lugar de guardarse, y el estado touched evita mostrar errores antes de que el usuario interactúe
+
+### Entrada #13
+- Fecha: 2026-11-05 - 4:14 PM
+- Integrante: Sergio Stiven Motato
+- Herramienta: Claude
+- Objetivo: Implementar la barra de progreso de las pestañas de registro (numeración, etiquetas y check verde por pestaña completa) y el botón fijo "Enviar registro" habilitado solo cuando las tres pestañas son válidas
+- Prompt: "por favor pasame el código para aplicar unos cambios de diseño que me habías recomendado:
+
+Barra de pestañas. tabBarShowLabel: false oculta las etiquetas, que sí defines en cada pestaña. Con solo iconos no se entiende que hay 3 pasos. Muestra los textos o numera las pestañas (1, 2, 3), y agrega un check verde (colors.success) cuando una esté completa.
+(lo que requiero es que apliques la barra de progreso para las pestañas).
+
+y el boton de enviar registro como me lo habias propuesto." — Seguimiento: "pasame lo que me falta para implementar la barra de progreso y el botón de enviar registro, marca el codigo afectado como asistido por IA(como lo pide el taller) y crea la entrada #13 para la bitacora."
+- Resumen de la respuesta: Se creó el componente RegistrationTabBar, que se conecta al navegador con la prop tabBar y dibuja de arriba abajo una barra de progreso de tres segmentos con el contador de pasos completos, el botón "Enviar registro" (gris hasta que isRegistrationValid sea verdadero) y las pestañas numeradas con check verde cuando están completas. Se simplificó RegistrationTabs.js, se agregaron las claves de traducción (tabsShort, stepsCompleted, submittedTitle, submittedMessage, genderPlaceholder) y se indicaron las marcas de código asistido por IA.
+- Qué se usó / modificó / descartó: [completar: qué se implementó tal cual, qué se adaptó (por ejemplo el Alert provisional del envío) y qué se dejó para después]
+- Archivos y commit: src/components/registration/RegistrationTabBar.js, src/navigation/RegistrationTabs.js, src/languages/es.js, src/languages/en.js — Hash: [completar]
+- Verificación: [completar: ej. probado en Expo Go que la barra muestra 0/3 al inicio, que cada pestaña se marca con check verde al completarla y que el botón se habilita solo con las tres completas]
+- Aprendizaje: [completar: ej. cómo personalizar la barra de pestañas con la prop tabBar y derivar el progreso del contexto en lugar de guardarlo]

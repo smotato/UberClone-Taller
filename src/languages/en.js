@@ -15,6 +15,14 @@ export default {
   },
   registration: {
     title: 'Driver registration',
+    tabsShort: {
+      personal: 'Personal',
+      vehicle: 'Vehicle',
+      documents: 'Documents',
+    },
+    stepsCompleted: 'steps completed',
+    submittedTitle: 'Registration submitted',
+    submittedMessage: 'Your account is pending approval.',
     tabs: {
       personal: 'Personal data',
       vehicle: 'Vehicle',
