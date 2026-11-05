@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import RegistrationScreen from './src/screens/PersonalDataScreen';
 import { LanguageProvider } from './src/context/LanguageContext';
+import { RegistrationProvider } from './src/context/RegistrationContext';
 import { NavigationContainer } from '@react-navigation/native';
 import RegistrationTabs from './src/navigation/RegistrationTabs';
 
@@ -10,10 +11,12 @@ export default function App() {
   return (
       <SafeAreaProvider>
         <LanguageProvider>
-          <NavigationContainer>
-            <StatusBar style="light" />
-            <RegistrationTabs />
-          </NavigationContainer>
+          <RegistrationProvider>
+            <NavigationContainer>
+              <StatusBar style="light" />
+              <RegistrationTabs />
+            </NavigationContainer>
+          </RegistrationProvider>
         </LanguageProvider>
       </SafeAreaProvider>
   );

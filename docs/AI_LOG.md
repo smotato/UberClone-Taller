@@ -29,7 +29,7 @@
 - Prompt: "por favor diseña el theme.js con la paleta de colores que consideres adecuada, con todas las variables de spacing, typography, radius, etc; Debes definir por tu cuenta si el tema será claro u oscuro dependiendo que sea mas facil de manejar en desarrollo y recuerda que estamos inspirados en la App de Uber. Recuerda marcar este código como asistido por la IA."
 - Resumen de la respuesta: Se eligió tema claro con acentos en negro y azul. Se entregó theme.js con colors, spacing, radius, typography (con presets), shadows y sizes, más notas de uso.
 - Qué se usó / modificó / descartó: se adquirió por completo el archivo de tema del aplicativo (theme.js)
-- Archivos y commit: src/theme/theme.js — (completar hash)
+- Archivos y commit: src/theme/theme.js — Hash: d3a6403
 - Verificación: importado en una pantalla y los valores se aplican sin errores en Expo Go.
 - Aprendizaje: Crear cada parte del tema en diferentes constantes separadas en un mismo archivo.
 
@@ -57,7 +57,7 @@ de un campo.
 - Qué se usó / modificó / descartó: Se usa gran parte del languageContext brindado en la respuesta, se implementa manualmente el hook
 de useLanguage y se añade manualmente en el App.js el provider; Los archivos que contienen los textos correspondientes de cada idioma
 se habian creado manualmente en un momento anterior.
-- Archivos y commit: src/context/LanguageContext.js — (completar hash)
+- Archivos y commit: src/context/LanguageContext.js — Hash: d3a6403
 - Verificación: cambiar el idioma en el estado inicial y comprobar que la etiqueta y el resto de textos cambian.
 - Aprendizaje: Se aprende a crear una función para obtener el texto segun el idioma seleccionado y la clave del texto requerida.
 
@@ -69,7 +69,7 @@ se habian creado manualmente en un momento anterior.
 - Prompt: "Por ahora estoy haciendo la maqueta (visual, no funcional), de la parte de datos personales del registro del conductor, quiero que me des un ejemplo de como usar un Select, que usare para el campo genero, el modal + FlatList que usaré para recrear el selector de idioma en la app de Uber Pasajero y el selector de fecha para el campo fecha de nacimiento. Dime que librerias debo importar y toma de ejemplo como tengo los siguientes campos hasta el momento." (seguido del fragmento JSX con los campos birthDate, gender y language)
 - Resumen de la respuesta: Se entregaron SelectField y DateField, el archivo de opciones, la función formatDate, las claves de traducción nuevas y el uso en la pantalla. Se indicó instalar @react-native-community/datetimepicker y se explicó la diferencia entre Android e iOS.
 - Qué se usó / modificó / descartó: se usaron los componentes de SelectField y DateField para los campos de los formularios de registro, además se creo un archivo que va a contener arrays con las opciones de los distintos SelectField en el aplicativo.
-- Archivos y commit: src/components/forms/SelectField.js, src/components/forms/DateField.js, src/data/options.js — (completar hash)
+- Archivos y commit: src/components/forms/SelectField.js, src/components/forms/DateField.js, src/data/options.js — Hash: d3a6403
 - Verificación: Se prueba en Expo Go que el select abre, muestre las opciones y que el DateTimePicker abra el calendario para seleccionar una fecha.
 - Aprendizaje: Se aprende a implementar la libreria del DateTimePicker, además de como crear un componente tipo lista con FlatList y ventana Modal.
 
@@ -81,7 +81,7 @@ se habian creado manualmente en un momento anterior.
 - Prompt: "ayudame solo a corregir el diseño del formulario, entre los campos textinput y el label del siguiente campo no parece haber espacio, estan casi juntos, los unicos campos que parecen generar espacio debajo de su input son el datetimepicker y el select. dime exactamente que debo corregir en estilos." (acompañado del JSX y los estilos de la pantalla)
 - Resumen de la respuesta: Se identificó que los TextInput no usaban el estilo field ni tenían margen inferior, a diferencia de SelectField y DateField. Se corrigió con marginBottom en el estilo input y se unificó el color de fondo de los tres tipos de campo.
 - Qué se usó / modificó / descartó: Se añadio marginBottom en un estilo y se implemento en los input de los formularios.
-- Archivos y commit: src/screens/PersonalDataScreen.js — (completar hash)
+- Archivos y commit: src/screens/PersonalDataScreen.js — Hash: d3a6403
 - Verificación: revisado en Expo Go que todos los campos tienen el mismo espacio y color.
 - Aprendizaje: Se aprende a dar estilo uniforme a campos de un formulario.
 
@@ -93,7 +93,7 @@ se habian creado manualmente en un momento anterior.
 - Prompt: "estaba realizando las maquetas visuales de las pestañas de registro de conductor pero sin los campos que requieran fotos de la galeria o uso de la camara, me tope con que la pestaña 3 usa varios de estos campos, entonces para terminar la maqueta necesito que me digas que libreria importar, como utilizarla y dame un ejemplo de como integrar un campo tipo foto en cualquiera de los 3 formularios de registro. me imagino que los campos tipo foto, todos van a permitir o usar la camara o seleccionar una imagen desde galeria, no forzadamente una de las dos opciones, cierto?, tambien quisiera saber si para las validaciones requerimos adicionalmente una libreria que lea las imagenes?, o le dejamos esa pregunta a la profe?"
 - Resumen de la respuesta: Se recomendó expo-image-picker y se entregó PhotoField con elección entre cámara y galería, vista previa y permiso de cámara, junto con las claves de traducción y un ejemplo de uso. Se aclaró que la validación de foto obligatoria no requiere librería adicional y que verificar la placa exigiría OCR.
 - Qué se usó / modificó / descartó: Se uso el componente PhotoField generado.
-- Archivos y commit: src/components/form/PhotoField.js — (completar hash)
+- Archivos y commit: src/components/form/PhotoField.js — Hash: d3a6403
 - Verificación: probado en Expo Go que se elige desde galería o permite abrir la camara.
 - Aprendizaje: se aprende a implementar la librería expo-image-picker.
 
@@ -105,7 +105,7 @@ se habian creado manualmente en un momento anterior.
 - Prompt: "Como podemos hacer el checkbox para aceptar los terminos y condiciones con un estilo parecido al de la plataforma de uber?, podemos usar un pressable y darle estilos o que deberiamos usar?"
 - Resumen de la respuesta: Se recomendó Pressable con Ionicons sin librerías y se entregó CheckboxField con cuadro de esquinas pequeñas, relleno negro y palomita blanca al marcarse, soporte para mensaje de error y accesibilidad, más un nuevo valor radius.xs en el tema.
 - Qué se usó / modificó / descartó: Se implementó el componente CheckboxField generado por la IA; Manualmente se integra el componente en DocumentsScreen.
-- Archivos y commit: src/components/forms/CheckboxField.js — (completar hash)
+- Archivos y commit: src/components/forms/CheckboxField.js — Hash: d3a6403
 - Verificación: probado en Expo Go que el cuadro se marca y desmarca y que el texto largo baja de línea sin salirse
 - Aprendizaje: Se aprende a hacer un campo tipo checkbox utilizando Pressable y Ionicons.
 
@@ -117,7 +117,7 @@ se habian creado manualmente en un momento anterior.
 - Prompt: "Veo errores de estilos en las alertas del componente PhotoField, pide permisos en inglés y los textos en español se ven que no encajan bien en la alerta, inclusive un texto ni lo muestra completo y otra alerta parece vacía, solo tiene un título, un gran espacio en blanco y 3 botones de opción, ayúdame a corregir eso porfavor." (acompañado de 3 capturas de pantalla de las alertas)
 - Resumen de la respuesta: Se explicó que el permiso en inglés es un mensaje fijo de Expo Go, que el texto cortado se debía a pasar el mensaje como título del Alert y que el espacio vacío es una limitación del Alert nativo con tres botones. Se reemplazó el Alert de elección por una hoja inferior propia (Modal) y se dejó el aviso de permiso con título, mensaje y botón para abrir ajustes.
 - Qué se usó / modificó / descartó: No se implementan los cambios de Alert a Modal, se corrige simplemente los Alert para que muestren los textos correctamente y por ahora no se solución el problema de la solicitud de permisos  en inglés.
-- Archivos y commit: src/components/forms/PhotoField.js — (completar hash)
+- Archivos y commit: src/components/forms/PhotoField.js — Hash: d3a6403
 - Verificación: Se prueba en Expo Go que las alertas no contienen errores de diseño comot texto cortado o ventana de alerta incompleta.
 - Aprendizaje: Se aprende a manipular textos dentro de los Alerts.
 
@@ -132,3 +132,15 @@ se habian creado manualmente en un momento anterior.
 - Archivos y commit: ninguno.
 - Verificación: no requiere verificación debido a que fue una simple consulta.
 - Aprendizaje: ninguno debido a que aun no se implementa el plan de trabajo propuesto por Claude.
+
+### Entrada #12
+- Fecha: 2026-11-05 - 12:39 PM
+- Integrante: Sergio Stiven Motato
+- Herramienta: Claude
+- Objetivo: Obtener un ejemplo de validación de un campo (nombre completo), revisar el diseño visual de las pestañas de registro y definir dónde ubicar el botón "Enviar registro"
+- Prompt: "dame un ejemplo de como agregar validación a un campo, pasame las lineas exactas de ese ejemplo y donde irian, además de como usaría el registrationContext; Por último quiero que valides el diseño, si te parece bien o no, si se puede mejorar en cuanto a lo visual el tema y dime donde podría ir visualmente el botón de enviar registro."
+- Resumen de la respuesta: Se entregó el ejemplo completo para "Nombre completo": validador puro validateFullName en utils/validators.js que devuelve claves de traducción, clave nueva errors.nameTooLong en es/en, se guía en la creación de RegistrationContext (datos, touched, errores derivados con useMemo y validez por pestaña), y los cambios en PersonalDataScreen (value, onChangeText, onBlur, borde y mensaje de error). Se revisó el diseño (teclado que tapa campos, cabecera repetida, pestañas sin etiquetas, foto de perfil circular, estados de input, contraste) y se propuso una barra fija "Enviar registro" encima de la barra de pestañas mediante la prop tabBar del navegador.
+- Qué se usó / modificó / descartó: [completar: qué partes del ejemplo se implementaron, cuáles se adaptaron y cuáles se dejaron para después]
+- Archivos y commit: src/utils/validators.js, src/context/RegistrationContext.js — Hash: [completar]
+- Verificación: probado en Expo Go que el error aparece solo tras salir del campo con números, más de 50 caracteres y vacío, y que desaparece con un nombre válido
+- Aprendizaje: los errores se derivan del estado en lugar de guardarse, y el estado touched evita mostrar errores antes de que el usuario interactúe
