@@ -10,7 +10,15 @@ import { colors, spacing, radius, typography, sizes } from '../../theme/theme'
 // Fecha que muestra el selector la primera vez, antes de que el usuario elija
 const DEFAULT_PICKER_DATE = new Date(2000, 0, 1)
 
-export default function DateField({ label, placeholder, value, onChange, maximumDate }) {
+export default function DateField({
+  label,
+  placeholder,
+  value,
+  onChange,
+  maximumDate,
+  minimumDate,
+  error,
+}) {
   const { t } = useLanguage();
   const [showPicker, setShowPicker] = useState(false)
 
@@ -26,12 +34,19 @@ export default function DateField({ label, placeholder, value, onChange, maximum
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
 
-      <Pressable style={styles.input} onPress={() => setShowPicker(true)}>
+      {/* Borde rojo cuando el campo tiene error */}
+      <Pressable
+        style={[styles.input, error && styles.inputError]}
+        onPress={() => setShowPicker(true)}
+      >
         <Text style={value ? styles.valueText : styles.placeholderText}>
           {value ? value.toLocaleDateString() : placeholder}
         </Text>
         <Ionicons name="calendar-outline" size={sizes.iconSm} color={colors.textMuted} />
       </Pressable>
+
+      {/* Mensaje de error debajo del campo */}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       {showPicker && (
         <DateTimePicker
@@ -39,6 +54,7 @@ export default function DateField({ label, placeholder, value, onChange, maximum
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           maximumDate={maximumDate}
+          minimumDate={minimumDate}
           onChange={handleChange}
         />
       )}
@@ -72,6 +88,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  // Borde rojo cuando el campo tiene error
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    marginTop: spacing.xs,
   },
   valueText: {
     fontSize: typography.fontSize.md,

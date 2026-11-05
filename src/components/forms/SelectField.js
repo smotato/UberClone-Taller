@@ -14,6 +14,7 @@ export default function SelectField({
   options,
   value,
   onChange,
+  error,
 }) {
   const { t } = useLanguage()
   const insets = useSafeAreaInsets()
@@ -33,8 +34,11 @@ export default function SelectField({
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
 
-      {/* Se ve como un input pero es un botón que abre el modal */}
-      <Pressable style={styles.input} onPress={() => setVisible(true)}>
+      {/* Se ve como un input pero es un botón que abre el modal; borde rojo si hay error */}
+      <Pressable
+        style={[styles.input, error && styles.inputError]}
+        onPress={() => setVisible(true)}
+      >
         <Text
           style={selected ? styles.valueText : styles.placeholderText}
           numberOfLines={1}
@@ -43,6 +47,9 @@ export default function SelectField({
         </Text>
         <Ionicons name="chevron-down" size={sizes.iconSm} color={colors.textMuted} />
       </Pressable>
+
+      {/* Mensaje de error debajo del campo */}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
       <Modal
         visible={visible}
@@ -108,6 +115,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  // Borde rojo cuando el campo tiene error
+  inputError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    marginTop: spacing.xs,
   },
   valueText: {
     flex: 1,

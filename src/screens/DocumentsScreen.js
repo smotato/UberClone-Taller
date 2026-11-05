@@ -23,7 +23,8 @@ export default function DocumentsScreen() {
   const inspectionRequired = isInspectionRequired(data.year)
 
   // Las fechas de vencimiento deben ser posteriores a hoy: mínimo mañana
-  const tomorrow = new Date().setDate(new Date().getDate() + 1)
+  const tomorrow = new Date()
+  tomorrow.setDate(tomorrow.getDate() + 1)
 
   return (
     <View style={styles.container}>

@@ -84,15 +84,42 @@ export function RegistrationProvider({ children }) {
     color:        validateSelect(data.color),
     capacity:     validateCapacity(data.capacity, data.category),   // depende de category
     vehiclePhoto: validateVehiclePhoto(data.vehiclePhoto),
-    }), [data])
+
+    licenseNumber:    validateLicenseNumber(data.licenseNumber),
+    licensePhoto:     validateDocumentPhoto(data.licensePhoto),
+    licenseExpiry:    validateExpiryDate(data.licenseExpiry),
+    soatPhoto:        validateDocumentPhoto(data.soatPhoto),
+    soatExpiry:       validateExpiryDate(data.soatExpiry),
+    inspectionPhoto:  validateInspectionPhoto(data.inspectionPhoto, data.year),
+    inspectionExpiry: validateInspectionExpiry(data.inspectionExpiry, data.year),
+    mercadoPagoEmail: validateMercadoPagoEmail(data.mercadoPagoEmail),
+    terms:            validateTerms(data.terms),
+  }), [data])
 
   const isPersonalValid =
     !errors.profilePhoto && !errors.fullName && !errors.idNumber && !errors.phone &&
     !errors.birthDate && !errors.gender && !errors.email && !errors.language
 
+  const isVehicleValid =
+    !errors.category && !errors.plate && !errors.brand && !errors.model &&
+    !errors.year && !errors.color && !errors.capacity && !errors.vehiclePhoto
+
+  const isDocumentsValid =
+    !errors.licenseNumber && !errors.licensePhoto && !errors.licenseExpiry &&
+    !errors.soatPhoto && !errors.soatExpiry &&
+    !errors.inspectionPhoto && !errors.inspectionExpiry &&
+    !errors.mercadoPagoEmail && !errors.terms
+
+  const isRegistrationValid = isPersonalValid && isVehicleValid && isDocumentsValid
+
   const value = useMemo(
-    () => ({ data, errors, touched, setField, touchField, isPersonalValid }),
-    [data, errors, touched, setField, touchField, isPersonalValid]
-  )
+    () => ({
+        data, errors, touched, setField, touchField,
+        isPersonalValid, isVehicleValid, isDocumentsValid, isRegistrationValid,
+    }),
+    [data, errors, touched, setField, touchField,
+    isPersonalValid, isVehicleValid, isDocumentsValid, isRegistrationValid]
+   )
+
   return <RegistrationContext.Provider value={value}>{children}</RegistrationContext.Provider>
 }

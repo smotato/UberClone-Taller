@@ -14,7 +14,7 @@ const PICKER_OPTIONS = {
   quality: 0.7,
 }
 
-export default function PhotoField({ label, hint, value, onChange }) {
+export default function PhotoField({ label, hint, value, onChange, error }) {
   const { t } = useLanguage()
 
   const takePhoto = async () => {
@@ -53,7 +53,8 @@ export default function PhotoField({ label, hint, value, onChange }) {
       <Text style={styles.label}>{label}</Text>
       {hint ? <Text style={styles.hint}>{hint}</Text> : null}
 
-      <Pressable style={styles.box} onPress={openOptions}>
+      {/* Borde rojo cuando el campo tiene error */}
+      <Pressable style={[styles.box, error && styles.boxError]} onPress={openOptions}>
         {value ? (
           <>
             <Image source={{ uri: value }} style={styles.image} />
@@ -69,6 +70,9 @@ export default function PhotoField({ label, hint, value, onChange }) {
           </View>
         )}
       </Pressable>
+
+      {/* Mensaje de error debajo del campo */}
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   )
 }
@@ -96,6 +100,15 @@ const styles = StyleSheet.create({
     borderColor: colors.borderStrong,
     borderRadius: radius.md,
     overflow: 'hidden',
+  },
+  // Borde rojo cuando el campo tiene error (mantiene el punteado)
+  boxError: {
+    borderColor: colors.error,
+  },
+  errorText: {
+    ...typography.caption,
+    color: colors.error,
+    marginTop: spacing.xs,
   },
   placeholder: {
     flex: 1,
