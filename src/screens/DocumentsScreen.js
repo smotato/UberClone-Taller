@@ -49,6 +49,7 @@ export default function DocumentsScreen() {
                   onChangeText={(text) => setField('licenseNumber', text.replace(/\D/g, ''))}
                   onBlur={() => touchField('licenseNumber')}
                   keyboardType="number-pad"
+                  maxLength={10}
                 />
                 {licenseNumberError ? <Text style={styles.errorText}>{licenseNumberError}</Text> : null}
 

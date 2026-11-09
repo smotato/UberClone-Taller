@@ -157,7 +157,7 @@ Barra de pestañas. tabBarShowLabel: false oculta las etiquetas, que sí defines
 
 y el boton de enviar registro como me lo habias propuesto." — Seguimiento: "pasame lo que me falta para implementar la barra de progreso y el botón de enviar registro, marca el codigo afectado como asistido por IA(como lo pide el taller) y crea la entrada #13 para la bitacora."
 - Resumen de la respuesta: Se creó el componente RegistrationTabBar, que se conecta al navegador con la prop tabBar y dibuja de arriba abajo una barra de progreso de tres segmentos con el contador de pasos completos, el botón "Enviar registro" (gris hasta que isRegistrationValid sea verdadero) y las pestañas numeradas con check verde cuando están completas. Se simplificó RegistrationTabs.js, se agregaron las claves de traducción (tabsShort, stepsCompleted, submittedTitle, submittedMessage, genderPlaceholder) y se indicaron las marcas de código asistido por IA.
-- Qué se usó / modificó / descartó: [completar: qué se implementó tal cual, qué se adaptó (por ejemplo el Alert provisional del envío) y qué se dejó para después]
-- Archivos y commit: src/components/registration/RegistrationTabBar.js, src/navigation/RegistrationTabs.js, src/languages/es.js, src/languages/en.js — Hash: [completar]
-- Verificación: [completar: ej. probado en Expo Go que la barra muestra 0/3 al inicio, que cada pestaña se marca con check verde al completarla y que el botón se habilita solo con las tres completas]
-- Aprendizaje: [completar: ej. cómo personalizar la barra de pestañas con la prop tabBar y derivar el progreso del contexto en lugar de guardarlo]
+- Qué se usó / modificó / descartó: Se usó el archivo RegistrationTabBar.js y se modificó el RegistrationTabs.js
+- Archivos y commit: src/components/registration/RegistrationTabBar.js, src/navigation/RegistrationTabs.js — Hash: 5a0e3f2
+- Verificación: probado en Expo Go que la barra muestra 0/3 al inicio, que cada pestaña se marca con check verde al completarla y que el botón se habilita solo con las tres completas
+- Aprendizaje: cómo personalizar la barra de pestañas con la prop tabBar y derivar el progreso del contexto en lugar de guardarlo
