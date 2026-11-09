@@ -1,6 +1,7 @@
 export default {
   common: {
     next: 'Siguiente',
+    back: 'Atrás',
     submit: 'Enviar registro',
     done: 'Listo',
     addPhoto: 'Toca para agregar una foto',

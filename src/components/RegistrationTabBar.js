@@ -28,6 +28,10 @@ export default function RegistrationTabBar({ state, navigation }) {
   }
   const doneCount = Object.values(completed).filter(Boolean).length
   const total = state.routes.length
+  // Navegación con flechas: pestaña anterior y siguiente según la posición actual
+  const hasPrev = state.index > 0
+  const hasNext = state.index < total - 1
+  const goTo = (index) => navigation.navigate(state.routes[index].name)
 
   const handleSubmit = () => {
     // TODO: enviar a Firebase con estado "pendiente de aprobación" (siguiente entregable)
@@ -68,58 +72,88 @@ export default function RegistrationTabBar({ state, navigation }) {
         </Text>
       </Pressable>
 
-      {/* Pestañas numeradas; el check verde indica que la pestaña está completa */}
-      <View style={styles.tabs}>
-        {state.routes.map((route, index) => {
-          const isFocused = state.index === index
-          const isDone = completed[route.name]
+      {/* Fila inferior: flecha atrás, pestañas numeradas y flecha siguiente */}
+      <View style={styles.tabsRow}>
+        {hasPrev ? (
+          <Pressable
+            style={[styles.navButton, styles.navButtonArrow]}
+            onPress={() => goTo(state.index - 1)}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.back')}
+          >
+            <Ionicons name="arrow-back" size={sizes.iconMd} color={colors.text} />
+          </Pressable>
+        ) : (
+          <View style={styles.navPlaceholder} />
+        )}
 
-          const onPress = () => {
-            const event = navigation.emit({
-              type: 'tabPress',
-              target: route.key,
-              canPreventDefault: true,
-            })
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params)
+        {/* Pestañas numeradas; el check verde indica que la pestaña está completa */}
+        <View style={styles.tabs}>
+          {state.routes.map((route, index) => {
+            const isFocused = state.index === index
+            const isDone = completed[route.name]
+
+            const onPress = () => {
+              const event = navigation.emit({
+                type: 'tabPress',
+                target: route.key,
+                canPreventDefault: true,
+              })
+              if (!isFocused && !event.defaultPrevented) {
+                navigation.navigate(route.name, route.params)
+              }
             }
-          }
 
-          return (
-            <Pressable
-              key={route.key}
-              style={styles.tab}
-              onPress={onPress}
-              accessibilityRole="button"
-              accessibilityState={{ selected: isFocused }}
-            >
-              <View
-                style={[
-                  styles.circle,
-                  isFocused && styles.circleActive,
-                  isDone && styles.circleDone,
-                ]}
+            return (
+              <Pressable
+                key={route.key}
+                style={styles.tab}
+                onPress={onPress}
+                accessibilityRole="button"
+                accessibilityState={{ selected: isFocused }}
               >
-                {isDone ? (
-                  <Ionicons name="checkmark" size={sizes.iconSm} color={colors.textOnPrimary} />
-                ) : (
-                  <Text style={[styles.circleText, isFocused && styles.circleTextActive]}>
-                    {index + 1}
-                  </Text>
-                )}
-              </View>
-              <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]} numberOfLines={1}>
-                {t(TAB_LABELS[route.name])}
-              </Text>
-            </Pressable>
-          )
-        })}
+                <View
+                  style={[
+                    styles.circle,
+                    isFocused && styles.circleActive,
+                    isDone && styles.circleDone,
+                  ]}
+                >
+                  {isDone ? (
+                    <Ionicons name="checkmark" size={sizes.iconSm} color={colors.textOnPrimary} />
+                  ) : (
+                    <Text style={[styles.circleText, isFocused && styles.circleTextActive]}>
+                      {index + 1}
+                    </Text>
+                  )}
+                </View>
+                <Text style={[styles.tabLabel, isFocused && styles.tabLabelActive]} numberOfLines={1}>
+                  {t(TAB_LABELS[route.name])}
+                </Text>
+              </Pressable>
+            )
+          })}
+        </View>
+
+        {hasNext ? (
+          <Pressable
+            style={[styles.navButton, styles.navButtonArrow]}
+            onPress={() => goTo(state.index + 1)}
+            accessibilityRole="button"
+            accessibilityLabel={t('common.next')}
+          >
+            <Ionicons name="arrow-forward" size={sizes.iconMd} color={colors.text} />
+          </Pressable>
+        ) : (
+          <View style={styles.navPlaceholder} />
+        )}
       </View>
     </View>
   )
 }
 
 const CIRCLE_SIZE = 28
+const NAV_SIZE = 44
 
 const styles = StyleSheet.create({
   container: {
@@ -181,8 +215,33 @@ const styles = StyleSheet.create({
   },
 
   // Pestañas
-  tabs: {
+    // Fila con las flechas a los lados y las pestañas en el centro
+  tabsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  tabs: {
+    flex: 1,
+    flexDirection: 'row',
+  },
+
+  // Flechas de navegación
+  navButton: {
+    width: NAV_SIZE,
+    height: NAV_SIZE,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  navButtonArrow: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+  },
+  // Reserva el espacio de la flecha que no se muestra, para que las pestañas no se muevan
+  navPlaceholder: {
+    width: NAV_SIZE,
   },
   tab: {
     flex: 1,

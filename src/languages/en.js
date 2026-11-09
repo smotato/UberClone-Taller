@@ -1,6 +1,7 @@
 export default {
   common: {
     next: 'Next',
+    back: 'Back',
     submit: 'Submit registration',
     done: 'Done',
     addPhoto: 'Tap to add a photo',
