@@ -1,13 +1,20 @@
 // AI-assisted: see docs/AI_LOG.md #13
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useLanguage from '../hooks/useLanguage'
 import useRegistration from '../hooks/useRegistration'
-import buildDriver from '../utils/buildDriver'
-import { addDriver, idNumberExists } from '../services/dbServices'
+import { buildDriver } from '../utils/buildDriver'
+import { addDriver, idNumberExists, newDriverId } from '../services/dbServices'
+import {
+  uploadProfilePhoto,
+  uploadVehiclePhoto,
+  uploadLicensePhoto,
+  uploadSoatPhoto,
+  uploadInspectionPhoto,
+} from '../services/storageServices'
 import { colors, spacing, radius, typography, sizes } from '../theme/theme'
 
 // Clave de cada ruta -> clave de traducción de la etiqueta corta
@@ -46,7 +53,23 @@ export default function RegistrationTabBar({ state, navigation }) {
         Alert.alert(t('registration.submitErrorTitle'), t('registration.duplicateId'))
         return
       }
-      const driverId = await addDriver(buildDriver(data))
+      // El ID se genera antes para usarlo en la ruta de Storage (drivers/<id>/...)
+      const newId = newDriverId()
+      const driver = buildDriver(data)
+      // Se suben las fotos en paralelo y se guardan las URL (no las uri locales del teléfono)
+      const [profileURL, vehicleURL, licenseURL, soatURL, inspectionURL] = await Promise.all([
+        uploadProfilePhoto(newId, data.profilePhoto),
+        uploadVehiclePhoto(newId, data.vehiclePhoto),
+        uploadLicensePhoto(newId, data.licensePhoto),
+        uploadSoatPhoto(newId, data.soatPhoto),
+        uploadInspectionPhoto(newId, data.inspectionPhoto),
+      ])
+      driver.profilePhotoURL = profileURL
+      driver.vehicle.vehiclePhotoURL = vehicleURL
+      driver.documents.licensePhotoURL = licenseURL
+      driver.documents.soatPhotoURL = soatURL
+      driver.documents.inspectionPhotoURL = inspectionURL
+      const driverId = await addDriver(driver, newId)
       // TODO: guardar driverId en AsyncStorage como sesión
       Alert.alert(t('registration.submittedTitle'), t('registration.submittedMessage'))
     } catch (error) {

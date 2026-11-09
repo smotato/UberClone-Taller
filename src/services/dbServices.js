@@ -3,8 +3,11 @@ import { db } from '../config/firebaseConfig'
 
 const COLLECTION = 'Driver'
 
-export const addDriver = async (driver) => {
-    const ref = doc(collection(db, COLLECTION))
+// Genera un ID de documento sin escribir nada todavía
+export const newDriverId = () => doc(collection(db, COLLECTION)).id
+
+export const addDriver = async (driver, id = newDriverId()) => {
+    const ref = doc(db, COLLECTION, id)
     await setDoc(ref, {
         profilePhotoURL: driver.profilePhotoURL,
         fullName: driver.fullName,
@@ -26,11 +29,11 @@ export const addDriver = async (driver) => {
         },
         documents: {
             licenseNumber: driver.documents.licenseNumber,
-            licensePhoto: driver.documents.licensePhoto,
+            licensePhotoURL: driver.documents.licensePhotoURL,
             licenseExpiry: driver.documents.licenseExpiry,
-            soatPhoto: driver.documents.soatPhoto,
+            soatPhotoURL: driver.documents.soatPhotoURL,
             soatExpiry: driver.documents.soatExpiry,
-            inspectionPhoto: driver.documents.inspectionPhoto,
+            inspectionPhotoURL: driver.documents.inspectionPhotoURL,
             inspectionExpiry: driver.documents.inspectionExpiry,
             mercadoPagoEmail: driver.documents.mercadoPagoEmail,
         },
