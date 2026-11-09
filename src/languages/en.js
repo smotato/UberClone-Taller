@@ -16,6 +16,9 @@ export default {
   },
   registration: {
     title: 'Driver registration',
+    submitErrorTitle: 'Could not submit',
+    submitErrorMessage: 'Check your connection and try again.',
+    duplicateId: 'A registration with this ID number already exists.',
     tabsShort: {
       personal: 'Personal',
       vehicle: 'Vehicle',

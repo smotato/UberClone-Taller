@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useLanguage from '../hooks/useLanguage'
 import useRegistration from '../hooks/useRegistration'
+import buildDriver from '../utils/buildDriver'
+import { addDriver, idNumberExists } from '../services/dbServices'
 import { colors, spacing, radius, typography, sizes } from '../theme/theme'
 
 // Clave de cada ruta -> clave de traducción de la etiqueta corta
@@ -18,7 +20,8 @@ const TAB_LABELS = {
 export default function RegistrationTabBar({ state, navigation }) {
   const { t } = useLanguage()
   const insets = useSafeAreaInsets()
-  const { isPersonalValid, isVehicleValid, isDocumentsValid, isRegistrationValid } = useRegistration()
+  const { data, isPersonalValid, isVehicleValid, isDocumentsValid, isRegistrationValid } = useRegistration()
+  const [ sending, setSending ] = useState(false)
 
   // Una pestaña está completa cuando todos sus campos son válidos
   const completed = {
@@ -33,9 +36,24 @@ export default function RegistrationTabBar({ state, navigation }) {
   const hasNext = state.index < total - 1
   const goTo = (index) => navigation.navigate(state.routes[index].name)
 
-  const handleSubmit = () => {
-    // TODO: enviar a Firebase con estado "pendiente de aprobación" (siguiente entregable)
-    Alert.alert(t('registration.submittedTitle'), t('registration.submittedMessage'))
+  const handleSubmit = async () => {
+    if (sending) return;
+
+    setSending(true)
+    try {
+      // El ID es automático, así que se evita el registro duplicado consultando por documento
+      if (await idNumberExists(data.idNumber)) {
+        Alert.alert(t('registration.submitErrorTitle'), t('registration.duplicateId'))
+        return
+      }
+      const driverId = await addDriver(buildDriver(data))
+      // TODO: guardar driverId en AsyncStorage como sesión
+      Alert.alert(t('registration.submittedTitle'), t('registration.submittedMessage'))
+    } catch (error) {
+      Alert.alert(t('registration.submitErrorTitle'), t('registration.submitErrorMessage'))
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -62,7 +80,7 @@ export default function RegistrationTabBar({ state, navigation }) {
           !isRegistrationValid && styles.submitDisabled,
           pressed && isRegistrationValid && styles.submitPressed,
         ]}
-        disabled={!isRegistrationValid}
+        disabled={!isRegistrationValid || sending}
         onPress={handleSubmit}
         accessibilityRole="button"
         accessibilityState={{ disabled: !isRegistrationValid }}

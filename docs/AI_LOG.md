@@ -161,3 +161,27 @@ y el boton de enviar registro como me lo habias propuesto." — Seguimiento: "pa
 - Archivos y commit: src/components/registration/RegistrationTabBar.js, src/navigation/RegistrationTabs.js — Hash: 5a0e3f2
 - Verificación: probado en Expo Go que la barra muestra 0/3 al inicio, que cada pestaña se marca con check verde al completarla y que el botón se habilita solo con las tres completas
 - Aprendizaje: cómo personalizar la barra de pestañas con la prop tabBar y derivar el progreso del contexto en lugar de guardarlo
+
+### Entrada #14
+- Fecha: 2026-11-09 - 3:01 PM
+- Integrante: Sergio Stiven Motato
+- Herramienta: Claude
+- Objetivo: Revisar la conexión a Firebase/Firestore (firebaseConfig.js y dbServices.js), conectar el registro con addDriver al enviar el registro y definir cómo manejar la aprobación del conductor y el ID del documento
+- Prompt: "implemente dos archivos para conectarme a firebase/firestore (aun no se ha subido a la rama), primero el de config (firebaseConfig.js en src/config) con las credenciales, que no te voy a pasar por obvias razones (si necesitas saber algo especifico del archivo me lo dices). y el dbServices (en src/services) que sería para el CRUD de la bd: [código de src/services/dbServices.js pegado en el mensaje] por ahora solo con los metodos del conductor para realizar el manejo del tema del registro, quisiera saber con un ejemplo, como conecto un dato con el metodo addDriver para que quede en la base de datos, por ejemplo el fullName, ¿debería ser con un handler al dar clic en enviar registro? y segundo quiero que me des una idea para manejar el tema de aprobar el conductor en firebase, no debería ser un campo tipo bool?, y por lo que veo no estoy generando un id, ¿como podríamos usar el documento de identidad del usuario como id o sería mejor dejar que firebase genere un id automaticamente?."
+- Resumen de la respuesta: Se señalaron errores en dbServices (falta importar db, doc() sin ID, addDriver sin retorno, campos de fotos y términos ausentes, serverTimestamp) y se entregó la versión corregida con ID automático y la función idNumberExists para evitar duplicados. Se explicó cómo conectar el registro: buildDriver convierte los datos planos del contexto al objeto anidado y handleSubmit llama a idNumberExists y addDriver con manejo de errores. Se recomendó approvalStatus como texto ('pending', 'approved', 'rejected') en lugar de booleano, aprobar desde la consola de Firebase, reglas de Firestore y bloquear el interruptor de disponibilidad con onSnapshot. Se recomendó ID automático (y el uid de Firebase Auth cuando haya login) en lugar de la cédula, y se indicó guardar las claves en variables EXPO_PUBLIC_ dentro de un .env ignorado por Git, con .env.example.
+- Qué se usó / modificó / descartó: Se tomaron en cuenta algunos errores que se marcaron del dbServices.js como añadir doc, y la validación para ver si ya existe un conductor con el mismo documento de identidad aunque no creo que sea necesario para el flujo de este aplicativo, también se tomo el archivo buildDriver.js; Se descartó añadir el campo terms porque no lo veo necesario y utilizar serverTimestamp ya que prefiero que las fechas sean enviadas por el reloj de mi dispositivo y no del servidor; Por último se hacen los cambios correspondientes para ocultar las credenciales en un archivo .env.
+- Archivos y commit: src/config/firebaseConfig.js, src/services/dbServices.js, src/utils/buildDriver.js, .gitignore, .env.example — Hash: [completar]
+- Verificación: No se verifica aun al momento de hacer el commit.
+- Aprendizaje: Se aprende a utilizar los servicios de firebase tales como firestore y storage, además de integrar una bd y sus funciones CRUD al aplicativo; Tambien se aprende a ocultar datos o credenciales sensibles al repositorio.
+
+### Entrada #15
+- Fecha: 2026-11-09 - 4:57 PM
+- Integrante: Sergio Stiven Motato
+- Herramienta: Claude
+- Objetivo: Entender cómo manejar las credenciales de Firebase con un archivo .env, el .env.example y el .gitignore para no subir las claves al repositorio
+- Prompt: "ayudame a entender lo de las credenciales y el .env, ¿debo crear un archivo process.env y añadir allí las claves?, luego crear un env.example con solo los titulos de las key pero sin valor? y obviamente añadir .env en el gitignore, justo despues de .env*.local?"
+- Resumen de la respuesta: Se aclaró que process.env no es un archivo sino el objeto de JavaScript desde donde se leen las variables, y que el archivo a crear se llama .env en la raíz del proyecto, con las claves reales y sin subirse a Git. Se explicó que .env.example sí se sube, con los mismos nombres y sin valores, y que .env debe agregarse al .gitignore (la línea .env*.local solo cubre archivos que terminan en .local). Se advirtió reiniciar con npx expo start -c tras cambiar el .env y comprobar con git check-ignore que no se esté subiendo.
+- Qué se usó / modificó / descartó: No se recibieron archivos o código como respuesta.
+- Archivos y commit: Ninguno.
+- Verificación: git status no lista .env y git check-ignore .env lo confirma.
+- Aprendizaje: Se aprende a ocultar datos o credenciales sensibles al repositorio.

@@ -16,6 +16,9 @@ export default {
   },
   registration: {
     title: 'Registro de conductor',
+    submitErrorTitle: 'No se pudo enviar',
+    submitErrorMessage: 'Revisa tu conexión e inténtalo de nuevo.',
+    duplicateId: 'Ya existe un registro con este documento de identidad.',
     tabsShort: {
       personal: 'Datos',
       vehicle: 'Vehículo',
