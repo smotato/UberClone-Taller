@@ -7,7 +7,7 @@ import useRegistration from "../hooks/useRegistration";
 import DateField from "../components/forms/DateField";
 import PhotoField from "../components/forms/PhotoField";
 import CheckboxField from "../components/forms/CheckboxField"
-import { isInspectionRequired } from "../utils/validators";
+import { isInspectionRequired, isYearEntered } from "../utils/validators";
 
 export default function DocumentsScreen() {
   const { t } = useLanguage();
@@ -21,6 +21,12 @@ export default function DocumentsScreen() {
 
   // La revisión técnico-mecánica solo aplica según el año del vehículo (pestaña 2)
   const inspectionRequired = isInspectionRequired(data.year)
+    // Mensaje de la sección de revisión técnico-mecánica según el estado del año del vehículo
+  const inspectionNote = !isYearEntered(data.year)
+    ? t('registration.documents.inspectionNeedsYear')
+    : !inspectionRequired
+      ? t('registration.documents.inspectionNotRequired')
+      : null
 
   // Las fechas de vencimiento deben ser posteriores a hoy: mínimo mañana
   const tomorrow = new Date()
@@ -87,26 +93,26 @@ export default function DocumentsScreen() {
                   error={getError('soatExpiry')}
                 />
 
-                {inspectionRequired && (
-                  <>
-                    <PhotoField
-                      label={t('registration.documents.inspectionPhoto')}
-                      hint={t('registration.documents.inspectionPhotoHint')}
-                      value={data.inspectionPhoto}
-                      onChange={(uri) => { setField('inspectionPhoto', uri); touchField('inspectionPhoto') }}
-                      error={getError('inspectionPhoto')}
-                    />
+                {/* Sección siempre visible; se bloquea mientras no aplique */}
+                {inspectionNote ? <Text style={styles.inspectionNote}>{inspectionNote}</Text> : null}
+                <View style={!inspectionRequired && styles.inspectionLocked}>
+                  <PhotoField
+                    label={t('registration.documents.inspectionPhoto')}
+                    hint={t('registration.documents.inspectionPhotoHint')}
+                    value={data.inspectionPhoto}
+                    onChange={(uri) => { setField('inspectionPhoto', uri); touchField('inspectionPhoto') }}
+                    error={getError('inspectionPhoto')}
+                  />
 
-                    <DateField
-                      label={t('registration.documents.inspectionExpiry')}
-                      placeholder={t('registration.documents.inspectionExpiryPlaceholder')}
-                      value={data.inspectionExpiry}
-                      minimumDate={tomorrow}
-                      onChange={(date) => { setField('inspectionExpiry', date); touchField('inspectionExpiry') }}
-                      error={getError('inspectionExpiry')}
-                    />
-                  </>
-                )}
+                  <DateField
+                    label={t('registration.documents.inspectionExpiry')}
+                    placeholder={t('registration.documents.inspectionExpiryPlaceholder')}
+                    value={data.inspectionExpiry}
+                    minimumDate={tomorrow}
+                    onChange={(date) => { setField('inspectionExpiry', date); touchField('inspectionExpiry') }}
+                    error={getError('inspectionExpiry')}
+                  />
+                </View>
 
                 <Text style={styles.label}>{t('registration.documents.mercadoPagoEmail')}</Text>
                 <TextInput
@@ -221,5 +227,16 @@ const styles = StyleSheet.create({
   buttonText: {
     ...typography.button,
     color: colors.textOnPrimary,
+  },
+  // Mensaje sobre la revisión técnico-mecánica
+  inspectionNote: {
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+  },
+  // Sección bloqueada: atenuada y sin respuesta a toques
+  inspectionLocked: {
+    opacity: 0.45,
+    pointerEvents: 'none',
   },
 })

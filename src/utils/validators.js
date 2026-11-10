@@ -22,7 +22,7 @@ const MIN_VEHICLE_YEAR = 1950
 const XL_MIN_CAPACITY = 6
 const MAX_CAPACITY = 20
 // Años desde los que el vehículo exige revisión técnico-mecánica (confirmar con la profesora)
-const INSPECTION_REQUIRED_AFTER_YEARS = 6
+const INSPECTION_REQUIRED_AFTER_YEARS = 5
 
 // ---------- Helpers ----------
 const isEmpty = (value) => value === null || value === undefined || String(value).trim() === ''
@@ -158,11 +158,14 @@ export function validateExpiryDate(date) {
   return null
 }
 
-// La revisión técnico-mecánica solo aplica según el año del vehículo
+// El año solo cuenta como ingresado cuando tiene los 4 dígitos
+export const isYearEntered = (vehicleYear) => /^\d{4}$/.test(String(vehicleYear ?? ''))
+
+// La revisión técnico-mecánica solo aplica según el año del vehículo.
+// Sin año completo todavía no se sabe, así que no se exige.
 export function isInspectionRequired(vehicleYear) {
-  const year = Number(vehicleYear)
-  if (!year) return true                       // si aún no hay año, se asume obligatoria
-  return new Date().getFullYear() - year >= INSPECTION_REQUIRED_AFTER_YEARS
+  if (!isYearEntered(vehicleYear)) return false
+  return new Date().getFullYear() - Number(vehicleYear) >= INSPECTION_REQUIRED_AFTER_YEARS
 }
 
 export function validateInspectionPhoto(uri, vehicleYear) {

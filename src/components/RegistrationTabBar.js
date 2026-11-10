@@ -15,6 +15,7 @@ import {
   uploadSoatPhoto,
   uploadInspectionPhoto,
 } from '../services/storageServices'
+import { isInspectionRequired } from '../utils/validators'
 import { colors, spacing, radius, typography, sizes } from '../theme/theme'
 
 // Clave de cada ruta -> clave de traducción de la etiqueta corta
@@ -62,7 +63,10 @@ export default function RegistrationTabBar({ state, navigation }) {
         uploadVehiclePhoto(newId, data.vehiclePhoto),
         uploadLicensePhoto(newId, data.licensePhoto),
         uploadSoatPhoto(newId, data.soatPhoto),
-        uploadInspectionPhoto(newId, data.inspectionPhoto),
+        uploadInspectionPhoto(
+          newId,
+          isInspectionRequired(data.year) ? data.inspectionPhoto : null
+        ),
       ])
       driver.profilePhotoURL = profileURL
       driver.vehicle.vehiclePhotoURL = vehicleURL

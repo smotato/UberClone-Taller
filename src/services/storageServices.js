@@ -1,18 +1,42 @@
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { storage } from '../config/firebaseConfig'
+// AI-assisted: see docs/AI_LOG.md #16
 
-// Sube una imagen local (uri de expo-image-picker) a Firebase Storage
-// y devuelve la URL pública de descarga (string) para guardarla en Firestore.
+const CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME
+const UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+
+// Sube una imagen local (uri de expo-image-picker) a Cloudinary
+// y devuelve la URL pública (string) para guardarla en Firestore.
 export const uploadImage = async (uri, path) => {
-    const response = await fetch(uri)
-    const blob = await response.blob()
-    const storageRef = ref(storage, path)
-    await uploadBytes(storageRef, blob, { contentType: blob.type || 'image/jpeg' })
-    return getDownloadURL(storageRef)
-};
+    // Tipo de imagen según la extensión de la ruta local (por defecto JPG)
+    const type = uri.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg'
 
-export const removeImage = async (path) => {
-    await deleteObject(ref(storage, path))
+    // FormData con un archivo { uri, type, name } es la forma nativa de React Native para subir archivos
+    const formData = new FormData()
+    formData.append('file', { uri, type, name: 'photo' })
+    formData.append('upload_preset', UPLOAD_PRESET)
+    // El public_id es la "ruta" en Cloudinary; se quita la extensión para que la URL quede limpia
+    formData.append('public_id', path.replace(/\.[^/.]+$/, ''))
+
+    // Se usa XMLHttpRequest porque el fetch global de Expo (expo/fetch) no acepta
+    // archivos { uri, type, name } dentro de FormData ("Unsupported FormDataPart implementation").
+    // El XHR de React Native sí los envía de forma nativa.
+    // No se pone el encabezado Content-Type: React Native lo agrega solo, con el límite correcto
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest()
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`)
+        xhr.onload = () => {
+            let result = {}
+            try { result = JSON.parse(xhr.responseText) } catch (e) { /* respuesta no JSON */ }
+            if (xhr.status >= 200 && xhr.status < 300 && result.secure_url) {
+                resolve(result.secure_url)
+            } else {
+                reject(new Error(result.error?.message ?? `Cloudinary respondió ${xhr.status}`))
+            }
+        }
+        xhr.onerror = () => reject(new Error('Error de red al subir la imagen a Cloudinary'))
+        xhr.ontimeout = () => reject(new Error('Tiempo de espera agotado al subir la imagen'))
+        xhr.timeout = 60000
+        xhr.send(formData)
+    })
 };
 
 export const uploadLicensePhoto = (idDriver, uri) =>

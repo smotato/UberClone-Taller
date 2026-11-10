@@ -1,9 +1,12 @@
 // AI-assisted: see docs/AI_LOG.md #14
+import { isInspectionRequired } from './validators'
 
 export function buildDriver(data) {
+  const inspectionApplies = isInspectionRequired(data.year);
+
   return {
     profilePhoto: data.profilePhoto,           
-    fullName: data.fullName,
+    fullName: data.fullName.trim(),
     idNumber: data.idNumber,
     phone: data.phone,
     birthDate: data.birthDate,
@@ -13,8 +16,8 @@ export function buildDriver(data) {
     vehicle: {
       category: data.category,
       plate: data.plate,
-      brand: data.brand,
-      model: data.model,
+      brand: data.brand.trim(),
+      model: data.model.trim(),
       year: Number(data.year),
       color: data.color,
       capacity: Number(data.capacity),
@@ -26,8 +29,8 @@ export function buildDriver(data) {
       licenseExpiry: data.licenseExpiry,
       soatPhoto: data.soatPhoto,
       soatExpiry: data.soatExpiry,
-      inspectionPhoto: data.inspectionPhoto ?? null,    // opcional según el año: null, nunca undefined
-      inspectionExpiry: data.inspectionExpiry ?? null,
+      inspectionPhoto: inspectionApplies ? (data.inspectionPhoto ?? null) : null,
+      inspectionExpiry: inspectionApplies ? (data.inspectionExpiry ?? null) : null,
       mercadoPagoEmail: data.mercadoPagoEmail.trim().toLowerCase(),
     },
   }

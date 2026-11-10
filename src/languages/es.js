@@ -84,6 +84,8 @@ export default {
       licensePhotoHint: 'Fotografía el frente de tu licencia. Que se lea el número y la fecha de vencimiento.',
       soatPhotoHint: 'Fotografía el SOAT vigente. Que se vean la placa y la fecha de vencimiento.',
       inspectionPhotoHint: 'Fotografía el certificado de la revisión técnico-mecánica. Que se vea la fecha de vencimiento.',
+      inspectionNeedsYear: 'Primero ingresa el año del vehículo en la pestaña Vehículo. Si tu vehículo lo requiere, aquí podrás cargar la revisión técnico-mecánica.',
+      inspectionNotRequired: 'La revisión técnico-mecánica no aplica para el año de tu vehículo.',
     },
   },
   errors: {

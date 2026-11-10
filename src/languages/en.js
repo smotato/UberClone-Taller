@@ -84,6 +84,8 @@ export default {
       licensePhotoHint: 'Take a photo of the front of your license. The number and expiration date must be readable.',
       soatPhotoHint: 'Take a photo of your valid SOAT. The license plate and expiration date must be visible.',
       inspectionPhotoHint: 'Take a photo of your technical inspection certificate. The expiration date must be visible.',
+      inspectionNeedsYear: 'First enter the vehicle year in the Vehicle tab. If your vehicle requires it, you can upload the inspection here.',
+      inspectionNotRequired: 'The vehicle inspection does not apply to your vehicle\'s year.',
     },
   },
   errors: {

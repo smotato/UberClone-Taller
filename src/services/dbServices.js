@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, orderBy, where, limit } from "firebase/firestore";
 import { db } from '../config/firebaseConfig'
 
 const COLLECTION = 'Driver'
@@ -38,7 +38,7 @@ export const addDriver = async (driver, id = newDriverId()) => {
             mercadoPagoEmail: driver.documents.mercadoPagoEmail,
         },
         status: 'pending',
-        CreatedAt: Date.now(),
+        createdAt: Date.now(),
     });
     return ref.id;
 };
