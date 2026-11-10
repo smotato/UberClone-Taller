@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, orderBy, where, limit } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, query, orderBy, where, limit, onSnapshot } from "firebase/firestore";
 import { db } from '../config/firebaseConfig'
 
 const COLLECTION = 'Driver'
@@ -90,4 +90,15 @@ export const idNumberExists = async (idNumber) => {
   const q = query(collection(db, COLLECTION), where('idNumber', '==', idNumber), limit(1))
   const snap = await getDocs(q)
   return !snap.empty
+};
+
+// AI-assisted: see docs/AI_LOG.md #18
+// Escucha el documento del conductor en vivo. Llama onChange({ id, ...data }) o onChange(null) si no existe.
+// Devuelve la función unsubscribe para cancelar la suscripción.
+export const listenDriver = (idDriver, onChange, onError) => {
+    return onSnapshot(
+        doc(db, COLLECTION, idDriver),
+        (snap) => onChange(snap.exists() ? { id: snap.id, ...snap.data() } : null),
+        onError
+    );
 };

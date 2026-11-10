@@ -19,7 +19,6 @@ export default {
     submitErrorTitle: 'No se pudo enviar',
     submitErrorMessage: 'Revisa tu conexión e inténtalo de nuevo.',
     duplicateId: 'Ya existe un registro con este documento de identidad.',
-    sending: 'Enviando tu registro...',
     tabsShort: {
       personal: 'Datos',
       vehicle: 'Vehículo',
@@ -145,5 +144,32 @@ export default {
       yellow: 'Amarillo',
       other: 'Otro',
     },
+  },
+  // AI-assisted: see docs/AI_LOG.md #18
+  login: {
+    title: 'Iniciar sesión',
+    email: 'Correo electrónico',
+    emailPlaceholder: 'Ej: juan.perez@example.com',
+    idNumber: 'Documento de identidad',
+    idNumberHint: 'Tu documento de identidad es tu contraseña.',
+    submit: 'Iniciar sesión',
+    invalidTitle: 'Datos incorrectos',
+    invalidMessage: 'El correo o el documento de identidad no coinciden. Inténtalo de nuevo.',
+    connectionTitle: 'No se pudo iniciar sesión',
+    connectionMessage: 'Revisa tu conexión e inténtalo de nuevo.',
+  },
+  home: {
+    greeting: 'Hola',
+    available: 'Disponible',
+    unavailable: 'No disponible',
+    statusApproved: 'Tu cuenta está aprobada',
+    statusPending: 'Tu cuenta está pendiente de aprobación',
+    statusRejected: 'Tu cuenta fue rechazada',
+    availabilityBlocked: 'Podrás ponerte disponible cuando tu cuenta sea aprobada.',
+    logout: 'Cerrar sesión',
+  },
+  loading: {
+    errorMessage: 'No pudimos cargar tu información. Revisa tu conexión.',
+    retry: 'Reintentar',
   },
 }

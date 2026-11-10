@@ -19,7 +19,6 @@ export default {
     submitErrorTitle: 'Could not submit',
     submitErrorMessage: 'Check your connection and try again.',
     duplicateId: 'A registration with this ID number already exists.',
-    sending: 'Submitting your registration...',
     tabsShort: {
       personal: 'Personal',
       vehicle: 'Vehicle',
@@ -145,5 +144,32 @@ export default {
       yellow: 'Yellow',
       other: 'Other',
     },
+  },
+  // AI-assisted: see docs/AI_LOG.md #18
+  login: {
+    title: 'Log in',
+    email: 'Email',
+    emailPlaceholder: 'E.g. john.doe@example.com',
+    idNumber: 'ID number',
+    idNumberHint: 'Your ID number is your password.',
+    submit: 'Log in',
+    invalidTitle: 'Incorrect details',
+    invalidMessage: 'The email or ID number do not match. Please try again.',
+    connectionTitle: 'Could not log in',
+    connectionMessage: 'Check your connection and try again.',
+  },
+  home: {
+    greeting: 'Hello',
+    available: 'Available',
+    unavailable: 'Unavailable',
+    statusApproved: 'Your account is approved',
+    statusPending: 'Your account is pending approval',
+    statusRejected: 'Your account was rejected',
+    availabilityBlocked: 'You will be able to go available once your account is approved.',
+    logout: 'Log out',
+  },
+  loading: {
+    errorMessage: "We couldn't load your information. Check your connection.",
+    retry: 'Retry',
   },
 }

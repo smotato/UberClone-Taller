@@ -209,3 +209,15 @@ y el boton de enviar registro como me lo habias propuesto." — Seguimiento: "pa
 - Archivos y commit: src/components/LoadingOverlay.js — Hash: [completar]
 - Verificación: se envió un registro de prueba y se comprobó que el loader aparece al tocar el botón, bloquea la pantalla y desaparece al terminar con éxito o con error.
 - Aprendizaje: se aprende a implementar un loader al momento de una acción.
+
+### Entrada #18
+- Fecha: 2026-11-10 - 1:50 AM
+- Integrante: Sergio Stiven Motato
+- Herramienta: Claude
+- Objetivo: Obtener un plan de implementación con un paso a paso ordenado sobre como realizar el login del conductor teniendo en cuenta el manejo de sesión requerido.
+- Prompt: "hazme un plan de implementación para realizar el login, teniendo en cuenta como estoy estructurando mi proyecto, respetando los archivos para los context y los archivos para los hooks, e implementando AsyncStorage en un archivo useAlmacenamiento o el nombre correspondiente dentro de la carpeta hooks y que este use se va a llamar en el context correspondiente, ejem: RegistrationContext, tambien respetando los estilos del theme creado y usando estilos parecidos a las screen ya existentes; Deseo tambien que me orientes y decidas en que lugar debe ir cada archivo creado y demás reglas funcionales que tengas en cuenta a la hora de dar instrucciones."
+- Resumen de la respuesta: Se entregó el archivo PLAN_LOGIN.md, que contiene solo el paso a paso de lo que se debe hacer, sin código de la aplicación. Incluye las reglas generales que se deben seguir, el contexto del proyecto, las reglas funcionales acordadas (estados loading, unregistered, loggedOut y loggedIn, resultado del login según los datos y el estado del conductor, el driverId guardado por dispositivo y la sesión aparte), la ubicación de cada archivo nuevo y modificado (useStorage y useSession en hooks, SessionContext en context, LoginScreen, HomeScreen y LoadingScreen en screens, RootNavigator en navigation), la especificación por archivo, las reglas de estilo con los tokens del tema, las claves de traducción en español e inglés, lo que queda fuera de alcance, el orden de implementación con puntos de control.
+- Qué se usó / modificó / descartó: el plan se usó como instrucción, más no se agrega al aplicativo.
+- Archivos y commit: Ninguno.
+- Verificación: se contrastó el plan con las secciones 1, 2 y 3 del PDF del taller y con la estructura actual del repositorio.
+- Aprendizaje: cómo dividir una funcionalidad en un plan por archivos y pasos con puntos de control, y por qué la sesión y el driverId se guardan por separado.

@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useLanguage from '../hooks/useLanguage'
 import useRegistration from '../hooks/useRegistration'
+// AI-assisted: see docs/AI_LOG.md #18
+import useSession from '../hooks/useSession'
 import { buildDriver } from '../utils/buildDriver'
 import LoadingOverlay from './LoadingOverlay'
 import { addDriver, idNumberExists, newDriverId } from '../services/dbServices'
@@ -30,6 +32,8 @@ export default function RegistrationTabBar({ state, navigation }) {
   const { t } = useLanguage()
   const insets = useSafeAreaInsets()
   const { data, isPersonalValid, isVehicleValid, isDocumentsValid, isRegistrationValid } = useRegistration()
+  // AI-assisted: see docs/AI_LOG.md #18
+  const { registerDriver } = useSession()
   const [ sending, setSending ] = useState(false)
 
   // Una pestaña está completa cuando todos sus campos son válidos
@@ -75,7 +79,9 @@ export default function RegistrationTabBar({ state, navigation }) {
       driver.documents.soatPhotoURL = soatURL
       driver.documents.inspectionPhotoURL = inspectionURL
       const driverId = await addDriver(driver, newId)
-      // TODO: guardar driverId en AsyncStorage como sesión
+      // AI-assisted: see docs/AI_LOG.md #18
+      // Guarda el driverId en el celular: el cambio de sessionState lleva solo a Login
+      await registerDriver(driverId)
       Alert.alert(t('registration.submittedTitle'), t('registration.submittedMessage'))
     } catch (error) {
       Alert.alert(t('registration.submitErrorTitle'), t('registration.submitErrorMessage'))
@@ -195,7 +201,7 @@ export default function RegistrationTabBar({ state, navigation }) {
         )}
       </View>
 
-      <LoadingOverlay visible={sending} message={t('registration.sending')} />
+      <LoadingOverlay visible={sending} />
     </View>
   )
 }
