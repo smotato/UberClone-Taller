@@ -19,6 +19,7 @@ export default {
     submitErrorTitle: 'Could not submit',
     submitErrorMessage: 'Check your connection and try again.',
     duplicateId: 'A registration with this ID number already exists.',
+    sending: 'Submitting your registration...',
     tabsShort: {
       personal: 'Personal',
       vehicle: 'Vehicle',

@@ -193,7 +193,19 @@ y el boton de enviar registro como me lo habias propuesto." — Seguimiento: "pa
 - Objetivo: Reemplazar Firebase Storage por Cloudinary para subir las imágenes del registro (Storage exige el plan de pago Blaze) e integrar la subida con upload preset sin firma, variables de entorno y prueba
 - Prompt: "una pregunta, el proyecto que recomienda para las imagenes??, es que creo que storage de firebase cobra dinero, ¿o sabes si es gratuito?, es que tiene el mensaje: Storage requiere una cuenta de facturación (Blaze). Actualiza tu proyecto ahora y obtén $300 en crédito gratuito para probar Storage." — Seguimiento: "pásame la versión de uploadImage para Cloudinary, como integro cloudinary, que debo instalar, todo lo necesario para que quede listo y hacer la prueba, ademas ten en cuenta que no se que es cloudinary y nunca la he usado, asi que se muy detallado"
 - Resumen de la respuesta: Se explicó que Firebase Storage exige el plan Blaze (pago por uso con capa gratuita y tarjeta) mientras Firestore funciona sin él, y se compararon las opciones: seguir con Storage con alerta de presupuesto o usar Cloudinary, que el taller recomienda en la sección 7. Se detalló cómo crear la cuenta de Cloudinary, obtener el cloud name y crear un upload preset en modo Unsigned. Se entregó la nueva versión de storageServices.js, donde uploadImage sube con FormData a la API de Cloudinary y devuelve secure_url (sin necesidad de instalar paquetes ni convertir la imagen a blob), se quitaron removeImage y la importación de Storage en firebaseConfig.js, se agregaron las variables EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME y EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET, y se explicó la prueba y los errores típicos.
-- Qué se usó / modificó / descartó: [completar: ej. se usó la nueva uploadImage; se descartó Firebase Storage por el plan Blaze y la función removeImage porque borrar en Cloudinary requiere el API Secret]
-- Archivos y commit: src/services/storageServices.js, src/config/firebaseConfig.js, .env (no se sube), .env.example — Hash: [completar]
+- Qué se usó / modificó / descartó: se usó la nueva uploadImage; se descartó Firebase Storage por el plan Blaze y la función removeImage porque borrar en Cloudinary requiere el API Secret.
+- Archivos y commit: src/services/storageServices.js, src/config/firebaseConfig.js, .env (no se sube), .env.example — Hash: 6f49319
 - Verificación: se envió un registro de prueba, las imágenes aparecieron en la Media Library de Cloudinary y las URL https://res.cloudinary.com/... quedaron guardadas en el documento de Firestore
 - Aprendizaje: Se aprende a integrar cloudinary.
+
+### Entrada #17
+- Fecha: 2026-11-10 - 1:38 AM
+- Integrante: Sergio Stiven Motato
+- Herramienta: Claude
+- Objetivo: Implementar un loader que se muestre desde que se toca "Enviar registro" hasta que el registro se crea, respetando los estilos de la app
+- Prompt: "como puedo implementar un loader después de dar clic a enviar registro hasta que se logre crear el registro y respetando los estilos que tiene la app?"
+- Resumen de la respuesta: Se recomendó aprovechar el estado sending que ya existía en RegistrationTabBar y crear un componente reutilizable LoadingOverlay, basado en un Modal transparente con una tarjeta centrada que usa el ActivityIndicator y los tokens del tema (overlay, surface, radius, shadows y typography). Se indicó montarlo en RegistrationTabBar con visible={sending}, ocultarlo antes de cada Alert (en iOS una alerta no se muestra sobre un Modal abierto), ignorar el botón atrás de Android y agregar el texto "Enviando tu registro..." en español e inglés.
+- Qué se usó / modificó / descartó: se usa archivo LoadingOverlay.js y se modifica el componente RegistrationTabBar.js.
+- Archivos y commit: src/components/LoadingOverlay.js — Hash: [completar]
+- Verificación: se envió un registro de prueba y se comprobó que el loader aparece al tocar el botón, bloquea la pantalla y desaparece al terminar con éxito o con error.
+- Aprendizaje: se aprende a implementar un loader al momento de una acción.

@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import useLanguage from '../hooks/useLanguage'
 import useRegistration from '../hooks/useRegistration'
 import { buildDriver } from '../utils/buildDriver'
+import LoadingOverlay from './LoadingOverlay'
 import { addDriver, idNumberExists, newDriverId } from '../services/dbServices'
 import {
   uploadProfilePhoto,
@@ -193,6 +194,8 @@ export default function RegistrationTabBar({ state, navigation }) {
           <View style={styles.navPlaceholder} />
         )}
       </View>
+
+      <LoadingOverlay visible={sending} message={t('registration.sending')} />
     </View>
   )
 }
