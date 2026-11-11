@@ -6,10 +6,44 @@ import * as Location from 'expo-location'
 // Este es el único archivo que importa expo-location.
 // Si se cambia de librería de ubicación, solo debe cambiar este hook.
 
-// Cada cuánto como mínimo se recibe una nueva posición (Android), en milisegundos
-const UPDATE_INTERVAL_MS = 7000
-// Distancia mínima en metros para recibir una nueva posición; evita escrituras si el conductor está quieto
-const MIN_DISTANCE_METERS = 12
+// AI-assisted: see docs/AI_LOG.md #21
+// Frecuencia alta (Inicio enfocada): posiciones frecuentes para mover el auto con fluidez.
+// timeInterval solo aplica en Android; en iOS manda distanceInterval.
+const FAST_INTERVAL_MS = 1500
+const FAST_DISTANCE_METERS = 3
+// Frecuencia baja (disponible pero navegando por otra opción del menú): ahorra batería
+const SLOW_INTERVAL_MS = 7000
+const SLOW_DISTANCE_METERS = 12
+
+// AI-assisted: see docs/AI_LOG.md #21
+// Velocidad mínima en m/s para fiarse del rumbo del GPS (quieto, el GPS da rumbos erráticos)
+const MIN_SPEED_MS = 1
+// Distancia mínima en metros entre dos posiciones para calcular el rumbo por nuestra cuenta
+const MIN_BEARING_DISTANCE_METERS = 4
+const EARTH_RADIUS_METERS = 6371000
+const toRadians = (degrees) => (degrees * Math.PI) / 180
+
+// AI-assisted: see docs/AI_LOG.md #21
+// Distancia en metros entre dos coordenadas (fórmula de haversine)
+const distanceMeters = (a, b) => {
+  const dLat = toRadians(b.latitude - a.latitude)
+  const dLng = toRadians(b.longitude - a.longitude)
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(a.latitude)) * Math.cos(toRadians(b.latitude)) * Math.sin(dLng / 2) ** 2
+  return 2 * EARTH_RADIUS_METERS * Math.asin(Math.min(1, Math.sqrt(h)))
+}
+
+// AI-assisted: see docs/AI_LOG.md #21
+// Rumbo inicial en grados (0 a 360, desde el norte) al ir de la coordenada a hacia la b
+const bearingDegrees = (a, b) => {
+  const dLng = toRadians(b.longitude - a.longitude)
+  const lat1 = toRadians(a.latitude)
+  const lat2 = toRadians(b.latitude)
+  const y = Math.sin(dLng) * Math.cos(lat2)
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng)
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
+}
 
 // Cada cuánto se vuelve a consultar si el servicio de ubicación está encendido, en milisegundos
 const SERVICES_POLL_MS = 3000
@@ -28,11 +62,19 @@ const toLatLng = (position) => ({
   longitude: position.coords.longitude,
 })
 
-// Devuelve { location, permission, requestPermission, servicesEnabled, checkServices, error }.
-// tracking = true y permiso concedido => mantiene un observador de la posición.
+// Devuelve { location, heading, permission, requestPermission, servicesEnabled, checkServices, error }.
+// location: solo { latitude, longitude }; heading (grados desde el norte) va aparte.
+// watching = true, permiso concedido y servicio no apagado => mantiene un observador de la posición.
+// lowRate = true usa la frecuencia baja del observador.
 // servicesEnabled: null mientras se consulta, luego true o false (servicio de ubicación/GPS del teléfono).
-export default function useDriverLocation({ tracking }) {
+export default function useDriverLocation({ watching, lowRate = false }) {
   const [location, setLocation] = useState(null)
+  // AI-assisted: see docs/AI_LOG.md #21
+  // Rumbo del auto; vale 0 hasta que haya movimiento real
+  const [heading, setHeading] = useState(0)
+  // Posición de referencia para calcular el rumbo. Vive en una referencia, y heading en el estado del hook,
+  // así ambos se conservan cuando el observador se reinicia al cambiar de frecuencia.
+  const bearingAnchor = useRef(null)
   const [permission, setPermission] = useState('undetermined')
   const [servicesEnabled, setServicesEnabled] = useState(null)
   const [error, setError] = useState(null)
@@ -91,6 +133,32 @@ export default function useDriverLocation({ tracking }) {
     return () => clearInterval(id)
   }, [checkServices])
 
+  // AI-assisted: see docs/AI_LOG.md #21
+  // Procesa una posición del observador: actualiza location y, si hay movimiento real, el rumbo
+  const handlePosition = useCallback((position) => {
+    const next = toLatLng(position)
+    const { heading: gpsHeading, speed } = position.coords
+    const anchor = bearingAnchor.current
+    const speedKnown = Number.isFinite(speed) && speed >= 0
+    // Con velocidad desconocida solo decide la distancia; con velocidad conocida debe superar el mínimo
+    const movingBySpeed = speedKnown && speed >= MIN_SPEED_MS
+
+    let newHeading = null
+    if (movingBySpeed && Number.isFinite(gpsHeading) && gpsHeading >= 0) {
+      newHeading = gpsHeading % 360
+    } else if (anchor && (movingBySpeed || !speedKnown) && distanceMeters(anchor, next) >= MIN_BEARING_DISTANCE_METERS) {
+      newHeading = bearingDegrees(anchor, next)
+    }
+
+    // La referencia solo avanza cuando hay rumbo nuevo, así el ruido del GPS quieto no hace girar el auto
+    if (newHeading !== null || !anchor) bearingAnchor.current = next
+    if (newHeading !== null) setHeading(newHeading)
+
+    hasLocation.current = true
+    setLocation(next)
+    setError(null)
+  }, [])
+
   // Lee la posición actual una vez para centrar el mapa: con permiso concedido y servicio encendido
   useEffect(() => {
     if (permission !== 'granted' || servicesEnabled !== true || hasLocation.current) return
@@ -101,6 +169,7 @@ export default function useDriverLocation({ tracking }) {
     const apply = (position) => {
       if (cancelled || !position || hasLocation.current) return
       hasLocation.current = true
+      if (!bearingAnchor.current) bearingAnchor.current = toLatLng(position)
       setLocation(toLatLng(position))
       setError(null)
     }
@@ -142,9 +211,10 @@ export default function useDriverLocation({ tracking }) {
     }
   }, [])
 
-  // Seguimiento: solo mientras tracking sea true y el permiso esté concedido
+  // AI-assisted: see docs/AI_LOG.md #21
+  // Seguimiento: solo con watching, permiso concedido y el servicio no apagado (null = aún sin saber, se permite)
   useEffect(() => {
-    if (!tracking || permission !== 'granted') return undefined
+    if (!watching || permission !== 'granted' || servicesEnabled === false) return undefined
 
     let cancelled = false
     let subscription = null
@@ -153,15 +223,14 @@ export default function useDriverLocation({ tracking }) {
       try {
         const sub = await Location.watchPositionAsync(
           {
-            accuracy: Location.Accuracy.Balanced,
-            timeInterval: UPDATE_INTERVAL_MS,
-            distanceInterval: MIN_DISTANCE_METERS,
+            // AI-assisted: see docs/AI_LOG.md #21
+            // Con Inicio enfocada se usa GPS real (High) para que el auto se mueva con fluidez;
+            // con frecuencia baja basta Balanced y se ahorra batería
+            accuracy: lowRate ? Location.Accuracy.Balanced : Location.Accuracy.High,
+            timeInterval: lowRate ? SLOW_INTERVAL_MS : FAST_INTERVAL_MS,
+            distanceInterval: lowRate ? SLOW_DISTANCE_METERS : FAST_DISTANCE_METERS,
           },
-          (position) => {
-            hasLocation.current = true
-            setLocation(toLatLng(position))
-            setError(null)
-          },
+          handlePosition,
           (reason) => setError(new Error(String(reason)))
         )
         // Si el efecto ya se limpió mientras se creaba el observador, se detiene de inmediato
@@ -174,12 +243,12 @@ export default function useDriverLocation({ tracking }) {
 
     start()
 
-    // Limpieza: detiene el observador al pasar tracking a false o al desmontar
+    // Limpieza: detiene el observador al dejar de vigilar, al cambiar de frecuencia o al desmontar
     return () => {
       cancelled = true
       if (subscription) subscription.remove()
     }
-  }, [tracking, permission])
+  }, [watching, lowRate, permission, servicesEnabled, handlePosition])
 
-  return { location, permission, requestPermission, servicesEnabled, checkServices, error }
+  return { location, heading, permission, requestPermission, servicesEnabled, checkServices, error }
 }

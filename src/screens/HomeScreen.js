@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useIsFocused } from '@react-navigation/native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors, spacing, radius, typography, shadows, sizes } from '../theme/theme'
+import DriverMarker from '../components/DriverMarker'
 import useLanguage from '../hooks/useLanguage'
 import useSession from '../hooks/useSession'
 import useStorage from '../hooks/useStorage'
@@ -25,9 +26,9 @@ const DEFAULT_REGION = { latitude: 4.711, longitude: -74.0721, latitudeDelta: 0.
 const FOCUS_DELTA = 0.01
 const RECENTER_DURATION_MS = 400
 
-// AI-assisted: see docs/AI_LOG.md #20
-// Cada cuánto se reenvía la ubicación a Firestore mientras el conductor está disponible, en milisegundos
-const LOCATION_RESEND_MS = 10000
+// AI-assisted: see docs/AI_LOG.md #21
+// Cada cuánto como máximo se escribe la ubicación en Firestore mientras el conductor está disponible, en milisegundos
+const LOCATION_WRITE_MS = 10000
 
 // AI-assisted: see docs/AI_LOG.md #20
 // Intentos y espera (en milisegundos) al apagar la disponibilidad en Firestore
@@ -68,10 +69,9 @@ export default function HomeScreen({ navigation }) {
   const centeredOnce = useRef(false)
   const restoreDone = useRef(false)
   const busy = useRef(false)
-  // AI-assisted: see docs/AI_LOG.md #20
-  // Última ubicación conocida y momento de la última escritura en Firestore
+  // AI-assisted: see docs/AI_LOG.md #21
+  // Última ubicación conocida, usada por el temporizador de escritura en Firestore
   const locationRef = useRef(null)
-  const lastWriteAt = useRef(0)
   const searchAnim = useRef(new Animated.Value(0)).current
   const [panelWidth, setPanelWidth] = useState(0)
   // El mapa ignora animateToRegion hasta que termina de cargar
@@ -85,7 +85,13 @@ export default function HomeScreen({ navigation }) {
   // cerrar sesión o desmontar, al apagar el GPS, o si la cuenta deja de estar aprobada.
   // Limitación conocida: el seguimiento es solo en primer plano.
   const tracking = available && isApproved
-  const { location, permission, requestPermission, servicesEnabled, checkServices, error } = useDriverLocation({ tracking })
+  // AI-assisted: see docs/AI_LOG.md #21
+  // Se vigila la posición si el conductor está disponible y aprobado, o si Inicio está enfocada
+  // (el auto se mueve en pantalla aunque esté no disponible, sin escribir nada en Firestore).
+  // Con Inicio sin foco y el conductor disponible se baja la frecuencia para ahorrar batería.
+  const watching = tracking || isFocused
+  const { location, heading, permission, requestPermission, servicesEnabled, checkServices, error } =
+    useDriverLocation({ watching, lowRate: !isFocused })
 
   // El interruptor se bloquea si la cuenta no está aprobada o si el GPS está apagado
   const switchBlocked = !isApproved || servicesEnabled === false
@@ -151,32 +157,23 @@ export default function HomeScreen({ navigation }) {
     if (driverId) setDriverAvailability(driverId, false).catch(() => {})
   }, [servicesEnabled, available, driverId, storage])
 
-  // AI-assisted: see docs/AI_LOG.md #20
+  // AI-assisted: see docs/AI_LOG.md #21
   // Mantiene la última ubicación en una referencia para que el temporizador no se reinicie con cada cambio
   useEffect(() => {
     locationRef.current = location
   }, [location])
 
-  // AI-assisted: see docs/AI_LOG.md #20
-  // Escribe la ubicación en Firestore solo mientras hay seguimiento; sin alertas si falla
-  useEffect(() => {
-    if (!tracking || !location || !driverId) return
-    lastWriteAt.current = Date.now()
-    updateDriverLocation(driverId, { lat: location.latitude, lng: location.longitude }).catch(() => {})
-  }, [tracking, location, driverId])
-
-  // AI-assisted: see docs/AI_LOG.md #20
-  // Reenvía la última posición conocida cada LOCATION_RESEND_MS aunque el conductor esté quieto,
-  // para que locationUpdatedAt no envejezca. Si ya se escribió hace menos que el intervalo, se omite el ciclo.
+  // AI-assisted: see docs/AI_LOG.md #21
+  // Escribe en Firestore la última posición conocida cada LOCATION_WRITE_MS, solo con el conductor
+  // disponible y aprobado (tracking) y aunque esté quieto. Lo que se ve en pantalla se actualiza aparte,
+  // con mayor frecuencia. Sin alertas si la escritura falla.
   useEffect(() => {
     if (!tracking || !driverId) return undefined
     const id = setInterval(() => {
       const current = locationRef.current
       if (!current) return
-      if (Date.now() - lastWriteAt.current < LOCATION_RESEND_MS) return
-      lastWriteAt.current = Date.now()
       updateDriverLocation(driverId, { lat: current.latitude, lng: current.longitude }).catch(() => {})
-    }, LOCATION_RESEND_MS)
+    }, LOCATION_WRITE_MS)
     return () => clearInterval(id)
   }, [tracking, driverId])
 
@@ -288,7 +285,6 @@ export default function HomeScreen({ navigation }) {
         style={StyleSheet.absoluteFill}
         initialRegion={DEFAULT_REGION}
         onMapReady={() => setMapReady(true)}
-        showsUserLocation={permission === 'granted'}
         showsMyLocationButton={false}
         showsCompass={false}
         toolbarEnabled={false}
@@ -306,6 +302,9 @@ export default function HomeScreen({ navigation }) {
               />
             ))
           : null}
+
+          {/* AI-assisted: see docs/AI_LOG.md #21 */}
+          <DriverMarker coordinate={location} heading={heading} />
       </MapView>
 
       {/* Barra superior flotante */}
