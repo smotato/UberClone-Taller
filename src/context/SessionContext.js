@@ -3,10 +3,13 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from 'react'
 import useStorage from '../hooks/useStorage'
 import useLanguage from '../hooks/useLanguage'
-import { getDriver, listenDriver } from '../services/dbServices'
+import { getDriver, listenDriver, setDriverAvailability } from '../services/dbServices'
 
 // Idiomas que la app sabe mostrar
 const VALID_LANGUAGES = ['es', 'en']
+
+// Tiempo máximo en milisegundos que el cierre de sesión espera a Firestore para poner isAvailable en false
+const LOGOUT_AVAILABILITY_TIMEOUT_MS = 3000
 
 export const SessionContext = createContext(null)
 
@@ -118,9 +121,26 @@ export function SessionProvider({ children }) {
 
   // Cierra solo la sesión activa: se conserva el driverId para volver a Login
   const logout = useCallback(async () => {
+    // Mejor esfuerzo: deja al conductor no disponible. Sin red, la escritura de Firestore no termina,
+    // así que se espera un máximo de tiempo y se cierra la sesión igualmente.
+    if (driverId) {
+      try {
+        await Promise.race([
+          setDriverAvailability(driverId, false),
+          new Promise((resolve) => setTimeout(resolve, LOGOUT_AVAILABILITY_TIMEOUT_MS)),
+        ])
+      } catch {
+        // Si falla se continúa con el cierre de sesión
+      }
+    }
+    try {
+      await storage.saveLastAvailability(false)
+    } catch {
+      // Borrar el último estado guardado también es de mejor esfuerzo
+    }
     await storage.setSessionActive(false)
     setSessionState('loggedOut')
-  }, [storage])
+  }, [storage, driverId])
 
   const retryBootstrap = useCallback(() => bootstrap(), [bootstrap])
 

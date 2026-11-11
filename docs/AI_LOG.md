@@ -206,7 +206,7 @@ y el boton de enviar registro como me lo habias propuesto." — Seguimiento: "pa
 - Prompt: "como puedo implementar un loader después de dar clic a enviar registro hasta que se logre crear el registro y respetando los estilos que tiene la app?"
 - Resumen de la respuesta: Se recomendó aprovechar el estado sending que ya existía en RegistrationTabBar y crear un componente reutilizable LoadingOverlay, basado en un Modal transparente con una tarjeta centrada que usa el ActivityIndicator y los tokens del tema (overlay, surface, radius, shadows y typography). Se indicó montarlo en RegistrationTabBar con visible={sending}, ocultarlo antes de cada Alert (en iOS una alerta no se muestra sobre un Modal abierto), ignorar el botón atrás de Android y agregar el texto "Enviando tu registro..." en español e inglés.
 - Qué se usó / modificó / descartó: se usa archivo LoadingOverlay.js y se modifica el componente RegistrationTabBar.js.
-- Archivos y commit: src/components/LoadingOverlay.js — Hash: [completar]
+- Archivos y commit: src/components/LoadingOverlay.js — Hash: 5eb0e60
 - Verificación: se envió un registro de prueba y se comprobó que el loader aparece al tocar el botón, bloquea la pantalla y desaparece al terminar con éxito o con error.
 - Aprendizaje: se aprende a implementar un loader al momento de una acción.
 
@@ -221,3 +221,14 @@ y el boton de enviar registro como me lo habias propuesto." — Seguimiento: "pa
 - Archivos y commit: Ninguno.
 - Verificación: se contrastó el plan con las secciones 1, 2 y 3 del PDF del taller y con la estructura actual del repositorio.
 - Aprendizaje: cómo dividir una funcionalidad en un plan por archivos y pasos con puntos de control, y por qué la sesión y el driverId se guardan por separado.
+
+### Entrada #19
+- Fecha: 2026-11-10 - 1:07 PM
+- Integrante: Sergio Stiven Motato
+- Herramienta: Claude
+- Objetivo: Definir con qué continuar después del login y obtener un plan de implementación de la pantalla de Inicio con Drawer y mapa, revisando todo lo que pide el taller
+- Prompt: "ya termine el login, con que deberíamos seguir por ahora?, dejamos la pantalla de home lista, con su tab bar su drawer y mostrando el mapa?, hazme un plan de implementación para eso teniendo en cuenta todo lo que pide el taller, leelo minusociamente y con cuidado para que no se te escape ningun detalle." — Seguimiento: "sí, haz el plan_home y sí, haz la nueva entrada de la bitacora"
+- Resumen de la respuesta: Se releyó el PDF completo y se entregó una tabla de requisitos del taller para el Inicio (mapa, interruptor, seguimiento con limpieza de useEffect, bloqueo por aprobación, Drawer, hooks obligatorios, AsyncStorage y consumo de APIs). Se advirtió que el taller solo usa Tabs para el registro, por lo que no se agrega tab bar en Inicio. Se verificó con la lista de módulos de Expo Go de SDK 58 que @react-native-community/geolocation y @react-native-firebase/messaging no vienen incluidos, mientras que expo-location, react-native-maps, Reanimated, worklets, gesture-handler, webview, Stripe y expo-web-browser sí. Se explicó qué es un development build, por qué la librería de geolocalización no funciona en Expo Go, el flujo de pago de la sección 4 y por qué exige un backend, y que el pago en efectivo no necesita túnel. Con las respuestas de la profesora (se acepta expo-location; la pasarela devuelve aprobado o rechazado por API) se generó el archivo PLAN_HOME.md con el paso a paso, los archivos nuevos y modificados, las reglas de estilo, los textos en español e inglés, lo que queda fuera de alcance y los criterios de prueba.
+- Qué se usó / modificó / descartó: el plan se usó como instrucción para Claude Code; se descartó la tab bar en Inicio y la librería de geolocalización de la comunidad en favor de expo-location
+- Archivos y commit: DriverDrawerContent.js, useDriverLocation.js, DriverDrawer.js, HomeScreen.js y ProfileScreen.js - Hash:
+- Aprendizaje: diferencia entre Expo Go y development build, y por qué una librería con código nativo no incluida en Expo Go no funciona, tambien se aprende a como implementar mapa y ubicación en el aplicativo, además de como utilizar e implementar Drawer.

@@ -102,3 +102,16 @@ export const listenDriver = (idDriver, onChange, onError) => {
         onError
     );
 };
+
+// Actualiza solo el campo isAvailable (no toca status ni otros campos)
+export const setDriverAvailability = async (idDriver, isAvailable) => {
+    await updateDoc(doc(db, COLLECTION, idDriver), { isAvailable });
+};
+
+// Guarda la última ubicación del conductor; locationUpdatedAt usa Date.now() como el resto del archivo
+export const updateDriverLocation = async (idDriver, { lat, lng }) => {
+    await updateDoc(doc(db, COLLECTION, idDriver), {
+        location: { lat, lng },
+        locationUpdatedAt: Date.now(),
+    });
+};

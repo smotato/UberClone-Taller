@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import useSession from '../hooks/useSession'
 import LoadingScreen from '../screens/LoadingScreen'
 import LoginScreen from '../screens/LoginScreen'
-import HomeScreen from '../screens/HomeScreen'
+import DriverDrawer from './DriverDrawer'
 import RegistrationTabs from './RegistrationTabs'
 
 const Stack = createNativeStackNavigator()
@@ -26,7 +26,8 @@ export default function RootNavigator() {
         <Stack.Screen name="Login" component={LoginScreen} />
       )}
       {sessionState === 'loggedIn' && (
-        <Stack.Screen name="Home" component={HomeScreen} />
+        // Main es el Drawer del conductor; las pantallas del viaje se agregarán después como hermanas
+        <Stack.Screen name="Main" component={DriverDrawer} />
       )}
     </Stack.Navigator>
   )
