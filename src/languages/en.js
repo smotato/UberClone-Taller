@@ -124,7 +124,9 @@ export default {
       now: 'UberYa',
       economy: 'Economy',
       comfort: 'Comfort',
-      xl: 'UberXL',
+      xl: 'XL',
+      // AI-assisted: see docs/AI_LOG.md #20
+      premium: 'Premium',
     },
     categoryDescription: {
       hourly: 'Rent a vehicle with a driver and pay for the time you use it.',
@@ -132,6 +134,8 @@ export default {
       economy: 'Vehicles with a driver, sometimes older models, at a lower price.',
       comfort: 'Newer vehicles with a driver for a more comfortable ride.',
       xl: 'Extra space for groups or lots of luggage.',
+      // AI-assisted: see docs/AI_LOG.md #20
+      premium: 'High-end vehicles for a more comfortable and exclusive ride.',
     },
     color: {
       white: 'White',

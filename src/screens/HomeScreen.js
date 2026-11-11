@@ -25,6 +25,16 @@ const DEFAULT_REGION = { latitude: 4.711, longitude: -74.0721, latitudeDelta: 0.
 const FOCUS_DELTA = 0.01
 const RECENTER_DURATION_MS = 400
 
+// AI-assisted: see docs/AI_LOG.md #20
+// Cada cuánto se reenvía la ubicación a Firestore mientras el conductor está disponible, en milisegundos
+const LOCATION_RESEND_MS = 10000
+
+// AI-assisted: see docs/AI_LOG.md #20
+// Intentos y espera (en milisegundos) al apagar la disponibilidad en Firestore
+const AVAILABILITY_OFF_ATTEMPTS = 3
+const AVAILABILITY_OFF_RETRY_MS = 600
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 // Círculos de búsqueda alrededor del conductor (radio en metros); color verde con transparencia
 const CIRCLES = [
   { radius: 300, fill: `${colors.success}14` },
@@ -43,7 +53,8 @@ export default function HomeScreen({ navigation }) {
   const { driver, driverId, driverStatus, isApproved } = useSession()
   const storage = useStorage()
   const insets = useSafeAreaInsets()
-  // En un Drawer las pantallas siguen montadas al navegar, así que el foco decide el seguimiento
+  // AI-assisted: see docs/AI_LOG.md #20
+  // El foco solo se usa para el color de la barra de estado
   const isFocused = useIsFocused()
 
   // Disponibilidad que eligió el conductor
@@ -57,12 +68,23 @@ export default function HomeScreen({ navigation }) {
   const centeredOnce = useRef(false)
   const restoreDone = useRef(false)
   const busy = useRef(false)
+  // AI-assisted: see docs/AI_LOG.md #20
+  // Última ubicación conocida y momento de la última escritura en Firestore
+  const locationRef = useRef(null)
+  const lastWriteAt = useRef(0)
   const searchAnim = useRef(new Animated.Value(0)).current
   const [panelWidth, setPanelWidth] = useState(0)
   // El mapa ignora animateToRegion hasta que termina de cargar
   const [mapReady, setMapReady] = useState(false)
 
-  const tracking = available && isApproved && isFocused
+  // AI-assisted: see docs/AI_LOG.md #20
+  // El seguimiento ya no depende del foco. El taller pide detenerlo al "salir de la pantalla", pero se
+  // interpreta como salir del flujo del conductor (desmontaje, p. ej. al cerrar sesión), porque el Drawer
+  // mantiene Inicio montada al navegar a Ganancias, Historial o Perfil. Como en la app real de Uber Driver,
+  // el conductor sigue disponible mientras navega por el menú. Solo se detiene al apagar la disponibilidad,
+  // cerrar sesión o desmontar, al apagar el GPS, o si la cuenta deja de estar aprobada.
+  // Limitación conocida: el seguimiento es solo en primer plano.
+  const tracking = available && isApproved
   const { location, permission, requestPermission, servicesEnabled, checkServices, error } = useDriverLocation({ tracking })
 
   // El interruptor se bloquea si la cuenta no está aprobada o si el GPS está apagado
@@ -93,11 +115,25 @@ export default function HomeScreen({ navigation }) {
     }
     if (permission === 'granted') {
       restoreDone.current = true
+      // AI-assisted: see docs/AI_LOG.md #20
+      // busy evita que la reconciliación apague la disponibilidad mientras se restaura
+      busy.current = true
       setDriverAvailability(driverId, true)
         .then(() => setAvailable(true))
         .catch(() => storage.saveLastAvailability(false).catch(() => {}))
+        .finally(() => { busy.current = false })
     }
   }, [storedAvailability, permission, isApproved, driverId, storage])
+
+  // AI-assisted: see docs/AI_LOG.md #20
+  // Reconciliación: si localmente está no disponible, la cuenta está aprobada y el documento en vivo dice
+  // true, se corrige en Firestore. No corre durante una activación (busy) ni antes de terminar la restauración.
+  useEffect(() => {
+    if (!driverId || !isApproved || available || activating) return
+    if (busy.current || !restoreDone.current) return
+    if (driver?.isAvailable !== true) return
+    setDriverAvailability(driverId, false).catch(() => {})
+  }, [driverId, isApproved, available, activating, driver?.isAvailable, storedAvailability])
 
   // Si la cuenta deja de estar aprobada mientras está disponible, se apaga sola
   useEffect(() => {
@@ -115,11 +151,34 @@ export default function HomeScreen({ navigation }) {
     if (driverId) setDriverAvailability(driverId, false).catch(() => {})
   }, [servicesEnabled, available, driverId, storage])
 
+  // AI-assisted: see docs/AI_LOG.md #20
+  // Mantiene la última ubicación en una referencia para que el temporizador no se reinicie con cada cambio
+  useEffect(() => {
+    locationRef.current = location
+  }, [location])
+
+  // AI-assisted: see docs/AI_LOG.md #20
   // Escribe la ubicación en Firestore solo mientras hay seguimiento; sin alertas si falla
   useEffect(() => {
     if (!tracking || !location || !driverId) return
+    lastWriteAt.current = Date.now()
     updateDriverLocation(driverId, { lat: location.latitude, lng: location.longitude }).catch(() => {})
   }, [tracking, location, driverId])
+
+  // AI-assisted: see docs/AI_LOG.md #20
+  // Reenvía la última posición conocida cada LOCATION_RESEND_MS aunque el conductor esté quieto,
+  // para que locationUpdatedAt no envejezca. Si ya se escribió hace menos que el intervalo, se omite el ciclo.
+  useEffect(() => {
+    if (!tracking || !driverId) return undefined
+    const id = setInterval(() => {
+      const current = locationRef.current
+      if (!current) return
+      if (Date.now() - lastWriteAt.current < LOCATION_RESEND_MS) return
+      lastWriteAt.current = Date.now()
+      updateDriverLocation(driverId, { lat: current.latitude, lng: current.longitude }).catch(() => {})
+    }, LOCATION_RESEND_MS)
+    return () => clearInterval(id)
+  }, [tracking, driverId])
 
   // Centra el mapa la primera vez que llega la ubicación
   useEffect(() => {
@@ -178,12 +237,23 @@ export default function HomeScreen({ navigation }) {
       } else {
         // Se apaga primero en pantalla para detener el seguimiento de inmediato
         setAvailable(false)
+        // AI-assisted: see docs/AI_LOG.md #20
+        // Reintenta unas pocas veces con una espera corta; si sigue fallando, avisa al conductor
         try {
-          await setDriverAvailability(driverId, false)
           await storage.saveLastAvailability(false)
         } catch (e) {
-          Alert.alert(t('home.availabilityError'))
+          // Guardar el último estado local es de mejor esfuerzo
         }
+        let saved = false
+        for (let attempt = 0; attempt < AVAILABILITY_OFF_ATTEMPTS && !saved; attempt += 1) {
+          try {
+            await setDriverAvailability(driverId, false)
+            saved = true
+          } catch (e) {
+            if (attempt < AVAILABILITY_OFF_ATTEMPTS - 1) await wait(AVAILABILITY_OFF_RETRY_MS)
+          }
+        }
+        if (!saved) Alert.alert(t('home.availabilityError'))
       }
     } finally {
       busy.current = false

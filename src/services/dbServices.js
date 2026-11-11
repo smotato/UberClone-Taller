@@ -38,6 +38,9 @@ export const addDriver = async (driver, id = newDriverId()) => {
             mercadoPagoEmail: driver.documents.mercadoPagoEmail,
         },
         status: 'pending',
+        // AI-assisted: see docs/AI_LOG.md #20
+        // El conductor nuevo nace no disponible, para que el campo nunca esté ausente
+        isAvailable: false,
         createdAt: Date.now(),
     });
     return ref.id;

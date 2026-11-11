@@ -122,9 +122,11 @@ export default {
     category: {
       hourly: 'PorHoras',
       now: 'UberYa',
-      economy: 'Economy',
+      economy: 'Económico',
       comfort: 'Comfort',
-      xl: 'UberXL',
+      xl: 'XL',
+      // AI-assisted: see docs/AI_LOG.md #20
+      premium: 'Premium',
     },
     categoryDescription: {
       hourly: 'Alquila un vehículo con conductor y paga por el tiempo que lo uses.',
@@ -132,6 +134,8 @@ export default {
       economy: 'Vehículos con conductor, en ocasiones de modelos menos recientes, a menor precio.',
       comfort: 'Vehículos más modernos con conductor para un viaje más cómodo.',
       xl: 'Más espacio para grupos o con muchas maletas.',
+      // AI-assisted: see docs/AI_LOG.md #20
+      premium: 'Vehículos de gama alta para un viaje más cómodo y exclusivo.',
     },
     color: {
       white: 'Blanco',

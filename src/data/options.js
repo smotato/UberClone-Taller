@@ -16,12 +16,12 @@ export const LANGUAGE_OPTIONS = [
 
 // Categorías de vehículo (las mismas que ve el pasajero).
 // El value se guarda en inglés; el texto sale de la clave de traducción.
+// AI-assisted: see docs/AI_LOG.md #20
+// Solo las tres categorías del taller; coinciden con los multiplicadores de tarifa
 export const CATEGORY_OPTIONS = [
-  { value: 'hourly', labelKey: 'options.category.hourly', descriptionKey: 'options.categoryDescription.hourly' },
-  { value: 'now', labelKey: 'options.category.now', descriptionKey: 'options.categoryDescription.now' },
   { value: 'economy', labelKey: 'options.category.economy', descriptionKey: 'options.categoryDescription.economy' },
-  { value: 'comfort', labelKey: 'options.category.comfort', descriptionKey: 'options.categoryDescription.comfort' },
   { value: 'xl', labelKey: 'options.category.xl', descriptionKey: 'options.categoryDescription.xl' },
+  { value: 'premium', labelKey: 'options.category.premium', descriptionKey: 'options.categoryDescription.premium' },
 ]
 
 // Colores del vehiculo.
