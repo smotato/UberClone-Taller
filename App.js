@@ -9,6 +9,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { SessionProvider } from './src/context/SessionContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+// AI-assisted: see docs/AI_LOG.md #25
+import { TripProvider } from './src/context/TripContext';
+import { navigationRef } from './src/navigation/navigationRef';
 
 export default function App() {
   return (
@@ -18,12 +21,16 @@ export default function App() {
           <LanguageProvider>
             {/* AI-assisted: see docs/AI_LOG.md #18 */}
             <SessionProvider>
-              <RegistrationProvider>
-                <NavigationContainer>
-                  <StatusBar style="light" />
-                  <RootNavigator />
-                </NavigationContainer>
-              </RegistrationProvider>
+              {/* AI-assisted: see docs/AI_LOG.md #25 */}
+              {/* TripProvider decide qué pantalla del viaje se muestra y navega con navigationRef */}
+              <TripProvider>
+                <RegistrationProvider>
+                  <NavigationContainer ref={navigationRef}>
+                    <StatusBar style="light" />
+                    <RootNavigator />
+                  </NavigationContainer>
+                </RegistrationProvider>
+              </TripProvider>
             </SessionProvider>
           </LanguageProvider>
         </SafeAreaProvider>

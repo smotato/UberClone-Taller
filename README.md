@@ -3,7 +3,8 @@
 Aplicación móvil multiplataforma (iOS y Android) inspirada en la versión de conductor de Uber,
 construida con **React Native y Expo**. El conductor se registra con sus datos personales, del
 vehículo y documentos; inicia sesión; se pone **Disponible** o **No disponible** y comparte su
-ubicación en tiempo real sobre un mapa.
+ubicación en tiempo real sobre un mapa; recibe solicitudes de viaje, las atiende con una ruta
+sobre el mapa, cobra en efectivo y consulta sus ganancias, su saldo y su historial de carreras.
 
 > Proyecto académico. La app se ejecuta con **Expo Go**. Todos los servicios externos usan
 > credenciales de **prueba**.
@@ -21,12 +22,15 @@ ubicación en tiempo real sobre un mapa.
 9. [Cómo funciona la app](#cómo-funciona-la-app)
 10. [Reglas de validación del registro](#reglas-de-validación-del-registro)
 11. [Disponibilidad y ubicación](#disponibilidad-y-ubicación)
-12. [Estructura del proyecto](#estructura-del-proyecto)
-13. [Datos que guarda la app](#datos-que-guarda-la-app)
-14. [Decisiones técnicas](#decisiones-técnicas)
-15. [Limitaciones y trabajo pendiente](#limitaciones-y-trabajo-pendiente)
-16. [Uso de IA](#uso-de-ia)
-17. [Entrega y autor](#entrega-y-autor)
+12. [Flujo del viaje](#flujo-del-viaje)
+13. [Ganancias, historial y perfil](#ganancias-historial-y-perfil)
+14. [Herramientas de desarrollo](#herramientas-de-desarrollo)
+15. [Estructura del proyecto](#estructura-del-proyecto)
+16. [Datos que guarda la app](#datos-que-guarda-la-app)
+17. [Decisiones técnicas](#decisiones-técnicas)
+18. [Limitaciones y trabajo pendiente](#limitaciones-y-trabajo-pendiente)
+19. [Uso de IA](#uso-de-ia)
+20. [Entrega y autor](#entrega-y-autor)
 
 ## Estado del proyecto
 
@@ -36,34 +40,39 @@ Funcionalidades principales del taller (sección 1 del enunciado):
 |---|---|---|
 | 1 | Registro del conductor (datos personales, vehículo y documentos) con validaciones | Hecho |
 | 2 | Cambio de estado Disponible / No disponible y envío de la ubicación en tiempo real | Hecho |
-| 3 | Recepción de solicitudes con tiempo límite para aceptar o rechazar | Pendiente |
-| 4 | Navegación al punto de recogida y al destino con Google Directions API | Pendiente |
-| 5 | Cobro del viaje con Mercado Pago o Stripe en modo de prueba, y pago en efectivo | Pendiente |
-| 6 | Cálculo de tarifa, comisión y ganancia neta (`calculateFare`, `src/config/pricing.js`) | Pendiente |
-| 7 | Historial de carreras con filtros y resumen de ganancias | Pantallas creadas con mensaje vacío; lógica pendiente |
-| 8 | Navegación combinada: Stack, Tabs y Drawer | Hecha en lo que existe (ver más abajo) |
+| 3 | Recepción de solicitudes con tiempo límite para aceptar o rechazar | Hecho (con solicitudes simuladas hasta que exista la app del pasajero) |
+| 4 | Navegación al punto de recogida y al destino con Google Directions API (se usa OpenRouteService en su lugar) | Hecho |
+| 5 | Cobro del viaje con Mercado Pago o Stripe en modo de prueba, y pago en efectivo | Efectivo hecho; la pasarela de pagos está pendiente |
+| 6 | Cálculo de tarifa, comisión y ganancia neta (`calculateFare`, `src/config/pricing.js`) | Hecho |
+| 7 | Historial de carreras con filtros y resumen de ganancias | Hecho |
+| 8 | Navegación combinada: Stack, Tabs y Drawer | Hecha |
 
 Pantallas del conductor (sección 3):
 
 | Pantalla | Estado |
 |---|---|
 | Inicio (mapa e interruptor Disponible / No disponible) | Hecha |
-| Solicitud entrante | Pendiente |
-| Viaje en curso | Pendiente |
-| Cobro y resumen del viaje | Pendiente |
-| Ganancias | Provisional (mensaje vacío) |
-| Historial de carreras | Provisional (mensaje vacío) |
-| Perfil y configuración | Solo lectura; edición e idioma editable pendientes |
+| Solicitud entrante | Hecha |
+| Viaje en curso | Hecha |
+| Cobro y resumen del viaje | Hecha para efectivo; con pasarela queda en Pendiente |
+| Ganancias | Hecha |
+| Historial de carreras (con detalle y ruta en el mapa) | Hecha |
+| Perfil y configuración | Hecha: celular, correo, documentos e idioma editables; vehículo en solo lectura |
 
 Además existen: pantalla de carga, inicio de sesión y menú lateral (Drawer).
+
+Pendiente del enunciado: la pasarela de pagos (Mercado Pago o Stripe) y las notificaciones push
+(ver [Limitaciones y trabajo pendiente](#limitaciones-y-trabajo-pendiente)).
 
 ## Tecnologías
 
 - **Expo SDK 58**, React 19 y React Native 0.88 (JavaScript).
 - **React Navigation 7**: `native-stack`, `bottom-tabs` y `drawer`.
-- **Firebase** (SDK web `firebase`): Firestore como base de datos.
+- **Firebase** (SDK web `firebase`): Firestore como base de datos, con escucha en tiempo real,
+  transacciones y consultas de agregación.
 - **Cloudinary**: almacenamiento de las fotos (perfil, vehículo y documentos).
-- `react-native-maps`: mapa del conductor.
+- **OpenRouteService**: distancia, duración y ruta de los viajes (datos de OpenStreetMap).
+- `react-native-maps`: mapa del conductor y de los viajes.
 - `expo-location`: permiso y lectura de la ubicación.
 - `@react-native-async-storage/async-storage`: sesión y preferencias.
 - `expo-image-picker` y `@react-native-community/datetimepicker`: fotos y fechas.
@@ -78,6 +87,8 @@ Además existen: pantalla de carga, inicio de sesión y menú lateral (Drawer).
 - Un proyecto de **Firebase** con Firestore y una cuenta de **Cloudinary** (gratuita).
   Ver [Configuración de Firebase](#configuración-de-firebase) y
   [Configuración de Cloudinary](#configuración-de-cloudinary).
+- Opcional: una llave gratuita de **OpenRouteService** para dibujar las rutas de los viajes
+  (ver [Variables de entorno](#variables-de-entorno)).
 
 No se necesita un *development build*: todo funciona en Expo Go.
 
@@ -127,6 +138,7 @@ El archivo `.env` **no se sube a Git** (está en `.gitignore`). El repositorio i
 | `EXPO_PUBLIC_FIREBASE_MEASUREMENT_ID` | Configuración de Firebase (opcional) | Igual que la anterior |
 | `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` | Nombre de tu cuenta de Cloudinary | Panel de Cloudinary |
 | `EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Nombre del *upload preset* sin firma | Ver [Configuración de Cloudinary](#configuración-de-cloudinary) |
+| `EXPO_PUBLIC_ORS_API_KEY` | Llave de OpenRouteService para las rutas del viaje; opcional | Panel de [OpenRouteService](https://account.heigit.org/signup) → *Request a token* (plan gratuito Standard) |
 
 Notas de seguridad:
 
@@ -137,14 +149,23 @@ Notas de seguridad:
   `access_token` de Mercado Pago ni la `secret key` de Stripe. Cuando se implemente el pago irán
   solo en un backend, en un `.env` excluido de Git.
 - Solo se usan credenciales de prueba.
-- Todavía no se usa ninguna clave de Google Maps: el mapa funciona en Expo Go sin ella. Se
-  necesitará al implementar Directions y Distance Matrix.
+- El mapa funciona en Expo Go sin ninguna clave. `EXPO_PUBLIC_ORS_API_KEY` sirve únicamente
+  para calcular distancia, duración y ruta del viaje con OpenRouteService (ver
+  [Decisiones técnicas](#decisiones-técnicas)). Sin la llave, o si el servicio falla o se agota
+  la cuota, la app sigue funcionando y dibuja una línea recta de respaldo con un aviso.
+- **Limitación conocida:** los términos de HeiGIT (OpenRouteService) indican que cada llave
+  pertenece a una persona y que no debe usarse del lado del cliente de una aplicación, porque
+  se puede ver al inspeccionar las solicitudes. Aquí la llave viaja dentro de la app
+  (`EXPO_PUBLIC_`) porque es un proyecto académico sin backend; por eso cada persona que
+  ejecute la app debe usar su propia llave personal, que nunca se sube al repositorio. Una
+  versión de producción debería pedir las rutas desde un servidor propio.
 
 ## Configuración de Firebase
 
 1. Crea un proyecto en la consola de Firebase y registra una **app web** para obtener los valores
    de las variables `EXPO_PUBLIC_FIREBASE_*`.
-2. Crea la base de datos **Firestore**. La colección `Driver` se crea sola con el primer registro.
+2. Crea la base de datos **Firestore**. La colección `Driver` se crea sola con el primer registro
+   y la colección `trips`, con el primer viaje.
 3. Configura las **reglas de seguridad** (pestaña Reglas de Firestore). Un ejemplo mínimo para
    este proyecto, que debes probar en el simulador de reglas antes de publicar:
 
@@ -157,14 +178,28 @@ service cloud.firestore {
       allow create: if request.resource.data.status == 'pending';
       allow update: if request.resource.data.status == resource.data.status;
     }
+    match /trips/{id} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if request.resource.data.driverId == resource.data.driverId;
+      allow delete: if resource.data.isDemo == true;
+    }
   }
 }
 ```
 
-Esas reglas permiten registrar solo conductores en estado `pending` y no dejan que la app cambie
-el estado de aprobación. La lectura está abierta porque el proyecto no usa Firebase
-Authentication; es una simplificación del taller. No uses reglas de "modo de prueba" abiertas
-para siempre: vencen a los 30 días y dejan la base sin protección.
+Las reglas de `Driver` permiten registrar solo conductores en estado `pending` y no dejan que la
+app cambie el estado de aprobación. Las de `trips` permiten crear solicitudes y viajes (la app del
+pasajero y las herramientas de desarrollo), cambiar el estado de un viaje sin cambiarle el
+conductor, y borrar únicamente los viajes de ejemplo. La lectura está abierta porque el proyecto no
+usa Firebase Authentication; es una simplificación del taller. No uses reglas de "modo de prueba"
+abiertas para siempre: vencen a los 30 días y dejan la base sin protección.
+
+**Índices.** Las consultas de Ganancias y del Historial combinan filtros por conductor, método de
+pago y fecha de cierre, y pueden necesitar índices compuestos de Firestore (por ejemplo,
+`driverId` + `completedAt` descendente, y `driverId` + `paymentMethod` + `completedAt`
+descendente). Si falta alguno, con la app en modo desarrollo la consola de Metro muestra el error
+de Firestore con el enlace para crearlo con un clic.
 
 La app no usa Firebase Storage ni Firebase Authentication.
 
@@ -198,8 +233,9 @@ cambia `status` de nuevo a `pending`. El valor `rejected` muestra el aviso de cu
 **Navegación** (sección 1 del enunciado):
 
 - **Stack** raíz (`RootNavigator`): muestra una sola pantalla según el estado de la sesión
-  (carga, registro, inicio de sesión o aplicación principal). El flujo del viaje se agregará
-  aquí como pantallas hermanas de la principal.
+  (carga, registro, inicio de sesión o aplicación principal). Con la sesión iniciada, las
+  pantallas del flujo del viaje (solicitud entrante, viaje en curso y resumen) y el detalle de
+  un viaje del historial son pantallas hermanas de la principal.
 - **Tabs** para el registro: Datos personales, Vehículo y Documentos, con una barra propia que
   muestra el progreso (pasos completos), flechas para avanzar y retroceder, y el botón
   **Enviar registro**.
@@ -216,10 +252,12 @@ cambia `status` de nuevo a `pending`. El valor `rejected` muestra el aviso de cu
 3. **Inicio de sesión:** correo electrónico y **documento de identidad como contraseña**. Es
    una simplificación didáctica: el enunciado no define el inicio de sesión y la comprobación
    se hace contra Firestore, por lo que **no es autenticación real**. Los datos incorrectos
-   muestran una alerta sin indicar cuál falló.
+   muestran una alerta sin indicar cuál falló. Si el conductor cambió su correo desde el perfil,
+   el inicio de sesión se hace con el correo nuevo.
 4. **Inicio:** mapa con el auto del conductor, interruptor Disponible / No disponible y menú
    lateral. Un conductor pendiente puede entrar, pero el interruptor está bloqueado.
-5. **Cerrar sesión** (desde el menú o desde el perfil) deja la disponibilidad en No disponible y
+5. **Viajes:** estando Disponible llegan las solicitudes (ver [Flujo del viaje](#flujo-del-viaje)).
+6. **Cerrar sesión** (desde el menú o desde el perfil) deja la disponibilidad en No disponible y
    vuelve al inicio de sesión sin perder el registro del celular. Al reabrir la app la sesión
    se conserva.
 
@@ -232,11 +270,13 @@ Reglas de la sesión:
   ese documento: el registro rechaza documentos duplicados.
 - Si no hay conexión al abrir la app, se muestra un error con el botón **Reintentar** (no se
   trata como "sin registro").
-- El idioma de la app (español o inglés) se toma del conductor al iniciar sesión.
+- El idioma de la app (español o inglés) se toma del conductor al iniciar sesión; si el conductor
+  lo cambia, se conserva en el celular y en su cuenta.
 
 ## Reglas de validación del registro
 
 Se validan en `src/utils/validators.js`. Los errores aparecen bajo cada campo, nunca en un `Alert`.
+El perfil reutiliza estas mismas validaciones para los campos que permite editar.
 
 | Campo | Regla |
 |---|---|
@@ -280,6 +320,9 @@ importa `expo-location`**.
   la disponibilidad ni el envío de la ubicación, como en las apps reales de conductor. Se
   detienen al apagar el interruptor, cerrar sesión, apagar el GPS o perder la aprobación (la
   función de limpieza de `useEffect` detiene el observador).
+- **Durante un viaje** el envío de la ubicación a Firestore sigue siendo el de Inicio (que
+  permanece montado bajo las pantallas del viaje); el mapa del viaje abre su propio observador
+  para mover el auto con fluidez.
 - **El auto del conductor** reemplaza el punto azul. Se desliza entre posiciones y gira según
   el rumbo (GPS cuando hay movimiento; si no, calculado entre posiciones, y se conserva el
   último cuando está quieto). Estando **No disponible** el auto también se mueve en pantalla,
@@ -290,6 +333,107 @@ importa `expo-location`**.
 - **Último estado de disponibilidad:** se guarda en AsyncStorage y se restaura al abrir la app
   solo si la cuenta está aprobada y el permiso está concedido.
 
+## Flujo del viaje
+
+El flujo sigue los estados del enunciado, que se guardan en el campo `status` del viaje y deciden
+qué pantalla se muestra: `requested` → `accepted` → `driver_arriving` → `in_progress` →
+`completed` → `paid`, más `rejected` y `cancelled`. Las reglas de transición están en
+`src/utils/tripStateMachine.js` y el estado del viaje activo vive en `TripContext`.
+
+1. **Solicitud entrante.** Solo se reciben solicitudes si la cuenta está aprobada, el conductor
+   está Disponible y no tiene otro viaje en curso. La pantalla se abre sola, esté donde esté el
+   conductor, y muestra recogida, destino, distancia, duración, categoría, método de pago, tarifa
+   estimada y ganancia neta estimada, con un temporizador de **15 segundos**. Si llega a cero, la
+   solicitud se rechaza sola (`rejected` con motivo `timeout`). Si la solicitud ya no está
+   disponible (la canceló el pasajero), la app avisa.
+2. **Viaje en curso.** Al aceptar, el mapa dibuja la ruta del conductor a la recogida, con tiempo y
+   distancia. **Pasajero a bordo** cambia al tramo hacia el destino y **Finalizar viaje** cierra el
+   viaje. El conductor puede cancelar solo antes de que el pasajero esté a bordo.
+3. **Cobro y resumen.** Muestra tarifa final, comisión (con el porcentaje de ese viaje), propina,
+   ganancia neta y el estado del pago (Aprobado, Pendiente, Rechazado o Efectivo).
+   - **Efectivo:** el conductor toca **Cobro recibido en efectivo** y el viaje pasa a `paid`; la
+     comisión se descuenta del saldo.
+   - **Mercado Pago o Stripe:** todavía no hay pasarela, así que el viaje queda `completed` con el
+     pago **Pendiente** y se ve en el historial con ese estado.
+
+Reglas importantes:
+
+- **Cada cambio de estado es una transacción de Firestore** que comprueba que el viaje siga en el
+  estado esperado y que sea del conductor, para no pisar cambios del pasajero (por ejemplo, una
+  cancelación). Cada escritura tiene un tiempo máximo de 10 segundos: sin red, Firestore no falla
+  sino que espera, así que se corta la espera y se avisa con una alerta.
+- **Los montos se calculan una sola vez, al finalizar**, con `calculateFare` (la misma función
+  de la estimación) y se guardan como **números enteros** junto con el `commissionRate`
+  aplicado. La distancia y la duración finales son las del tramo recogida → destino, no el tiempo
+  real transcurrido.
+- **Rutas.** Se piden una sola vez por tramo y viaje (nunca en cada movimiento) a OpenRouteService.
+  Si falta la llave, se agota la cuota o falla la red, el mapa dibuja una línea recta punteada con
+  un aviso y el viaje continúa. Al finalizar se guarda la ruta del tramo cobrado de forma
+  compacta (polilínea codificada de hasta 100 puntos). Cuando se dibuja una ruta se muestra
+  "© OpenStreetMap contributors".
+- **Retomar el viaje.** Si se cierra la app con un viaje en curso, al abrirla e iniciar sesión se
+  vuelve a la pantalla que corresponde. Mientras hay un viaje activo no llegan solicitudes nuevas.
+- **Botón atrás bloqueado.** Ni el gesto ni el botón atrás de Android sacan al conductor de la
+  solicitud, del viaje o del resumen.
+
+## Ganancias, historial y perfil
+
+**Ganancias.** Muestra el saldo y las tarjetas de **Hoy**, **Esta semana** y **Este mes**, cada
+una con número de viajes, total facturado, comisiones, propinas, ganancia neta y promedio por
+viaje.
+
+- Los totales de dinero cuentan **solo los viajes pagados (`paid`)**. Un viaje terminado con pago
+  pendiente o rechazado aparece en el historial con su estado, pero no suma.
+- Los totales se calculan con `useMemo` sobre una consulta propia, acotada por fecha, de los
+  viajes pagados del periodo más antiguo (no sobre el historial paginado), así nunca salen
+  incompletos.
+- El **saldo** es la suma de las ganancias de los viajes pagados con pasarela menos las
+  comisiones de los viajes en efectivo, sobre **todos** los viajes pagados. Se calcula con
+  consultas de agregación de Firestore (tres sumas y un conteo de control), por lo que **requiere
+  conexión** y no se actualiza solo: se recarga al entrar a Ganancias, al llegar un viaje pagado
+  y con el gesto de actualizar. Si una consulta falla se muestra un error con **Reintentar**,
+  nunca un total parcial; si el conteo no cuadra (por ejemplo, un método de pago desconocido) se
+  muestra un aviso de descuadre.
+
+**Historial de carreras.** Lista paginada de a 20 viajes (`FlatList`), del más reciente al más
+antiguo, con los filtros **Hoy**, **Semana**, **Mes** y **Rango de fechas**, y un filtro por
+método de pago. Cada elemento muestra fecha y hora, origen → destino, categoría, tarifa, ganancia
+neta y estado del pago; al tocarlo se abre el detalle con la ruta dibujada, distancia, duración,
+comisión, propina y calificación. Un viaje sin ruta guardada se abre igual, solo con los datos.
+Los periodos usan la hora del celular y la semana empieza el lunes (ver
+[Decisiones técnicas](#decisiones-técnicas)).
+
+**Perfil y configuración.**
+
+- **Datos personales:** se pueden editar el **celular** y el **correo** (el correo es el de inicio
+  de sesión). La foto, el nombre, el documento de identidad, la fecha de nacimiento y el género
+  están bloqueados.
+- **Vehículo:** solo lectura. Un vehículo aprobado no se edita; cambiar de vehículo implicaría
+  registrarlo y aprobarlo de nuevo, y eso queda fuera de esta versión.
+- **Documentos:** licencia, SOAT y revisión técnico-mecánica (si aplica) se **renuevan** con una
+  foto nueva y un vencimiento nuevo posterior a hoy; las dos cosas van juntas. El número de
+  licencia está bloqueado y el correo de Mercado Pago es editable. Cambiar documentos **no pide
+  reaprobación**: no se toca el estado de la cuenta.
+- **Idioma:** se cambia al instante, sin botón Guardar, y se conserva en el celular y en la cuenta.
+- Cada tarjeta se edita por separado, solo una a la vez; **Guardar** se habilita cuando hay
+  cambios válidos y solo se escriben los campos que cambiaron.
+
+## Herramientas de desarrollo
+
+Como todavía no hay app del pasajero, hay herramientas que **solo aparecen con la app en modo
+desarrollo** (`npx expo start`, que es como corre en Expo Go; en un *build* de producción no
+existen):
+
+- En **Ganancias**: *Cargar viajes de ejemplo* (unos 15 viajes marcados con `isDemo`, con rutas,
+  distintos métodos y estados de pago), *Borrar viajes de ejemplo* (borra solo los marcados) y
+  *Simular solicitud* en efectivo o con pasarela, que crea una solicitud para el conductor. Para
+  recibirla hay que estar aprobado y Disponible.
+- En el **resumen de un viaje con pasarela**: *Simular pago aprobado* y *Simular pago rechazado*,
+  que hacen el trabajo que haría el backend de la pasarela.
+
+Cuando exista la app del pasajero, las solicitudes simuladas dejan de ser necesarias; sus botones
+se pueden retirar sin afectar el resto del flujo.
+
 ## Estructura del proyecto
 
 ```
@@ -299,34 +443,52 @@ app.json                    Configuración de Expo (incluye el plugin de expo-lo
 assets/                     Íconos y las imágenes del auto (car_icon.png, @2x y @3x)
 docs/AI_LOG.md              Bitácora de uso de IA
 src/
-  components/               DriverMarker, DriverDrawerContent, RegistrationTabBar,
-                            LoadingOverlay y forms/ (campos de formulario reutilizables)
-  config/                   firebaseConfig.js
-  context/                  LanguageContext, RegistrationContext, SessionContext
-  data/                     Opciones de listas (género, idioma, categoría, color)
-  hooks/                    useLanguage, useRegistration, useSession, useStorage,
-                            useDriverLocation
+  components/               DriverMarker, DriverDrawerContent, RegistrationTabBar, LoadingOverlay
+                            forms/     campos de formulario reutilizables
+                            profile/   secciones del perfil (datos, vehículo, documentos, idioma)
+                            earnings/  tarjetas de saldo y de periodos
+                            history/   filtros y elementos del historial
+                            trip/      mapa del viaje y atribución de la ruta
+  config/                   firebaseConfig, pricing (tarifas y comisión) y tripFlow (tiempos del viaje)
+  context/                  LanguageContext, RegistrationContext, SessionContext, TripContext
+  data/                     Opciones de listas (género, idioma, categoría, color, método de pago)
+  hooks/                    useLanguage, useRegistration, useSession, useStorage, useDriverLocation,
+                            useProfileEdit, useEarnings, useTripHistory, useTripRequests, useTrip,
+                            useCountdown
   languages/                es.js y en.js (textos de la interfaz)
-  navigation/               RootNavigator, RegistrationTabs, DriverDrawer
-  screens/                  Registro (3), Login, Carga, Inicio, Ganancias, Historial, Perfil
-  services/                 dbServices.js (Firestore) y storageServices.js (Cloudinary)
+  navigation/               RootNavigator, RegistrationTabs, DriverDrawer, navigationRef
+  screens/                  Registro (3), Login, Carga, Inicio, Ganancias, Historial, Detalle del
+                            viaje, Perfil, Solicitud entrante, Viaje en curso y Resumen del viaje
+  services/                 driverServices (conductor), tripServices (viajes), routesServices
+                            (rutas) y storageServices (Cloudinary)
   theme/                    theme.js (colores, espaciados, tipografía, sombras)
-  utils/                    validators.js y buildDriver.js
+  utils/                    validators, buildDriver, calculateFare, tripStateMachine, dateRanges,
+                            earningsSummary, polyline, profileMappers, formatCurrency y demoTrips
 ```
 
 El estado compartido usa **`useContext`**: la sesión del conductor (`SessionContext`), el
-formulario de registro (`RegistrationContext`) y el idioma (`LanguageContext`). Los textos están en
-español e inglés.
+formulario de registro (`RegistrationContext`), el idioma (`LanguageContext`) y el viaje activo
+(`TripContext`). Los textos están en español e inglés.
 
 ## Datos que guarda la app
 
-**Firestore** (colección `Driver`, un documento por conductor, identificador automático):
+**Firestore, colección `Driver`** (un documento por conductor, identificador automático):
 datos personales (`fullName`, `idNumber`, `phone`, `birthDate`, `gender`, `email`, `language`,
 `profilePhotoURL`), `vehicle` (`category`, `plate`, `brand`, `model`, `year`, `color`,
 `capacity`, `vehiclePhotoURL`), `documents` (licencia, SOAT, revisión técnico-mecánica y correo de
 Mercado Pago, con las URL de las fotos y las fechas de vencimiento), `status`
-(`pending`, `approved` o `rejected`), `isAvailable`, `location`, `locationUpdatedAt` y
-`createdAt`.
+(`pending`, `approved` o `rejected`), `isAvailable`, `location`, `locationUpdatedAt`,
+`createdAt` y, tras editar el perfil, `updatedAt`.
+
+**Firestore, colección `trips`** (un documento por viaje): `driverId`, `passengerId`, `origin` y
+`destination` (`lat`, `lng`, `address`), `category`, `distanceKm`, `durationMin`, `paymentMethod`
+(`mercadopago`, `stripe` o `cash`), `paymentStatus` (`approved`, `pending`, `rejected` o `cash`),
+`paymentId`, `status` (los siete estados del viaje, más `rejected`), `fare`, `commission`, `tip`,
+`driverEarnings` y `commissionRate` (pesos enteros), `rating`, `route` (polilínea codificada de
+hasta 100 puntos, o `null`), las marcas de tiempo de cada paso (`createdAt`, `acceptedAt`,
+`arrivingAt`, `startedAt`, `completedAt`, `paidAt`, `rejectedAt`, `cancelledAt`), `updatedAt` e
+`isDemo` en los viajes de ejemplo. Todas las marcas de tiempo son números (`Date.now()`) con la hora
+del celular, no la del servidor.
 
 **AsyncStorage** (solo sesión y preferencias, nunca datos sensibles):
 
@@ -335,6 +497,7 @@ Mercado Pago, con las URL de las fotos y las fechas de vencimiento), `status`
 | `@uberclone/driverId` | Identificador del conductor registrado en este celular |
 | `@uberclone/session` | Indicador de sesión activa |
 | `@uberclone/lastAvailability` | Último estado de disponibilidad elegido |
+| `@uberclone/language` | Idioma elegido (`es` o `en`) |
 
 No se guardan números de cuenta bancaria ni de tarjeta, ni en la app ni en AsyncStorage.
 
@@ -347,34 +510,69 @@ No se guardan números de cuenta bancaria ni de tarjeta, ni en la app ni en Asyn
   librería solo implicaría modificar ese hook.
 - **Cloudinary en lugar de Firebase Storage**, por la recomendación del enunciado (Storage puede
   exigir el plan de pago). La subida usa `XMLHttpRequest` porque el `fetch` global de Expo no
-  acepta archivos dentro de un `FormData`.
+  acepta archivos dentro de un `FormData`. Al renovar un documento la foto nueva se sube con un
+  nombre único (un preset sin firma no garantiza poder sobrescribir), por lo que las imágenes
+  anteriores quedan sin uso en Cloudinary y se pueden borrar a mano desde su *Media Library*.
 - **Ubicación en primer plano.** El seguimiento solo funciona con la app abierta.
 - **El Drawer mantiene la pantalla de Inicio montada**, por eso el seguimiento no depende de
   que Inicio esté enfocada. Se interpreta "salir de la pantalla" del enunciado como salir del
   flujo del conductor (cerrar sesión o desmontar la pantalla), y no como navegar a otra
-  opción del menú: así el flujo del viaje, que se abre encima del menú, podrá seguir enviando
-  la ubicación.
+  opción del menú: así el flujo del viaje, que se abre encima del menú, sigue enviando la
+  ubicación.
 - **Escrituras a Firestore limitadas** a una cada 10 segundos para cuidar la cuota gratuita,
   mientras la posición en pantalla se actualiza con más frecuencia.
 - **Sin Firebase Authentication.** El inicio de sesión compara correo y documento contra el
   documento de Firestore (ver advertencia en [Cómo funciona la app](#cómo-funciona-la-app)).
+- **Fechas con el reloj del celular.** Toda marca de tiempo que crea la app usa `Date.now()`
+  (la hora del teléfono), no la del servidor, y se guarda como número.
 - **La semana empieza el lunes.** En Ganancias e Historial, "Hoy", "Semana" y "Mes" se calculan
   con la hora del celular (no la del servidor): el día desde las 00:00, la semana desde el lunes
   a las 00:00 y el mes desde el día 1 a las 00:00. Ambas pantallas usan la misma regla y asignan
   cada viaje a un periodo según su `completedAt`.
+- **Solo los viajes pagados suman.** Los totales de Ganancias y el saldo cuentan únicamente viajes
+  `paid`; los `completed` con pago pendiente o rechazado se ven en el historial pero no suman.
+- **Saldo con agregaciones de Firestore**, sobre todos los viajes pagados y no sobre lo paginado
+  del historial. Evita descargar todos los viajes y no depende de un campo acumulado que pueda
+  desfasarse; a cambio solo funciona con conexión y no escucha cambios.
+- **Cambios de estado con transacciones**, para no pisar lo que haga el pasajero, con un tiempo
+  máximo de espera porque sin red Firestore no falla sino que espera.
+- **Ruta guardada de forma compacta:** polilínea codificada de hasta 100 puntos (unos cientos de
+  bytes), lejos del límite de 1 MiB por documento de Firestore. El detalle del viaje funciona si
+  el viaje no trae ruta.
+- **Vehículo de solo lectura y documentos sin reaprobación.** Las apps reales exigen reaprobación
+  al cambiar de vehículo o de documentos; aquí el vehículo aprobado es de solo lectura (cambiarlo
+  implicaría registrarlo y aprobarlo de nuevo) y los documentos se renuevan sin reaprobación,
+  porque el taller no la define y las reglas de Firestore impiden que la app cambie `status`.
+- **OpenRouteService en lugar de Directions y Distance Matrix de Google.** El enunciado nombra
+  Directions API y Distance Matrix API, pero Google las pasó a estado heredado (desde octubre de
+  2026 no se pueden habilitar en proyectos nuevos) y su reemplazo, Routes API, exige un proyecto
+  de Google Cloud con facturación. Por eso se usa OpenRouteService (datos de OpenStreetMap), que
+  ofrece lo mismo que pide el enunciado: *Directions* para la ruta dibujada y *Matrix* para la
+  distancia y la duración. Su plan gratuito permite 2.000 solicitudes diarias de Directions y 500
+  de Matrix (40 por minuto en ambas). Se llama una sola vez por evento (al ver una solicitud que
+  no trae distancia y duración, y al empezar cada tramo), nunca en cada movimiento, como
+  recomienda el enunciado. Cuando se dibuja una ruta se muestra la atribución
+  "© OpenStreetMap contributors". Todo el acceso está aislado en `src/services/routesServices.js`:
+  para cambiar de proveedor (Google, OSRM...) solo hay que reescribir ese archivo.
 - **Dependencias del Drawer:** `react-native-reanimated`, `react-native-worklets` y
   `react-native-gesture-handler` son requisitos de `@react-navigation/drawer`; no se usan
   directamente.
 
 ## Limitaciones y trabajo pendiente
 
-- Pendientes del enunciado: solicitud entrante con temporizador, viaje en curso con rutas
-  (Directions y Distance Matrix), cobro y resumen, ganancias reales, historial con filtros y
-  paginación, edición del perfil (incluido el idioma), `calculateFare` y
-  `src/config/pricing.js`, la pasarela de pagos (Mercado Pago o Stripe en modo de prueba, con
-  backend) y las notificaciones push (Firebase Cloud Messaging, que requiere un *development
-  build*).
-- La app del pasajero la entregará la profesora; hasta entonces no hay solicitudes de viaje.
+- **Pasarela de pagos pendiente.** Mercado Pago o Stripe en modo de prueba exigen un backend
+  (Node.js/Express o Cloud Functions) que guarde la llave secreta y confirme el pago. Mientras
+  tanto, un viaje que no es en efectivo queda `completed` con el pago Pendiente.
+- **Notificaciones push pendientes** (Firebase Cloud Messaging), que requieren un *development
+  build* y no funcionan en Expo Go.
+- **La app del pasajero la entregará la profesora.** Hasta entonces las solicitudes se simulan
+  con las [herramientas de desarrollo](#herramientas-de-desarrollo), asumiendo que una solicitud
+  es un viaje en estado `requested` con el `driverId` del conductor que la recibe. Reasignar una
+  solicitud rechazada a otro conductor no lo resuelve esta app.
+- La llave de OpenRouteService viaja dentro de la app (ver
+  [Variables de entorno](#variables-de-entorno)) y su plan gratuito tiene cuota diaria; sin llave
+  o sin cuota las rutas se reemplazan por una línea recta de respaldo.
+- El saldo de Ganancias necesita conexión: las agregaciones de Firestore no funcionan sin red.
 - El seguimiento de ubicación no funciona en segundo plano.
 - Si la app se cierra de golpe estando Disponible, el campo `isAvailable` puede quedar en
   `true` en la base de datos hasta la siguiente apertura; `locationUpdatedAt` permite detectar

@@ -263,6 +263,56 @@ export default {
     rejected: 'Rechazado',
     cash: 'Efectivo',
   },
+  // AI-assisted: see docs/AI_LOG.md #25
+  request: {
+    title: 'Nueva solicitud de viaje',
+    pickup: 'Recogida',
+    destination: 'Destino',
+    distance: 'Distancia',
+    duration: 'Duración',
+    category: 'Categoría',
+    paymentMethod: 'Método de pago',
+    estimatedFare: 'Tarifa estimada',
+    estimatedEarnings: 'Tu ganancia neta estimada',
+    calculating: 'Calculando...',
+    accept: 'Aceptar',
+    reject: 'Rechazar',
+    unavailable: 'La solicitud ya no está disponible.',
+    acceptError: 'No pudimos aceptar la solicitud. Revisa tu conexión e inténtalo de nuevo.',
+    rejectError: 'No pudimos rechazar la solicitud. Revisa tu conexión.',
+  },
+  // AI-assisted: see docs/AI_LOG.md #25
+  tripFlow: {
+    startPickup: 'Ir hacia el pasajero',
+    toPickup: 'Hacia el pasajero',
+    toDestination: 'Hacia el destino',
+    passengerOnBoard: 'Pasajero a bordo',
+    finishTrip: 'Finalizar viaje',
+    cancelTrip: 'Cancelar viaje',
+    cancelConfirm: '¿Cancelar este viaje?',
+    cancelledByPassenger: 'El pasajero canceló el viaje.',
+    routeUnavailable: 'No pudimos trazar la ruta. Puedes continuar con el viaje.',
+    transitionError: 'No pudimos actualizar el viaje. Revisa tu conexión e inténtalo de nuevo.',
+    tripUnavailable: 'No pudimos cargar el viaje.',
+  },
+  // AI-assisted: see docs/AI_LOG.md #25
+  tripSummary: {
+    title: 'Resumen del viaje',
+    finalFare: 'Tarifa final',
+    collectCash: 'Cobro recibido en efectivo',
+    waitingGateway: 'Esperando la confirmación de la pasarela de pago.',
+    backHome: 'Volver al inicio',
+  },
+  // AI-assisted: see docs/AI_LOG.md #25
+  // Solo para desarrollo: herramientas de prueba sin la app del pasajero
+  dev: {
+    simulateCash: 'Simular solicitud (efectivo)',
+    simulateGateway: 'Simular solicitud (pasarela)',
+    simulateApproved: 'Simular pago aprobado',
+    simulateRejected: 'Simular pago rechazado',
+    simulateDone: 'Solicitud de ejemplo creada. Ponte disponible para recibirla.',
+    simulateError: 'No se pudo crear la solicitud de ejemplo.',
+  },
   profile: {
     title: 'Perfil y configuración',
     personal: 'Datos personales',

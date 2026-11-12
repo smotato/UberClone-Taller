@@ -14,8 +14,9 @@ export const formatTripDate = (ms, locale) => {
   return `${day} ${time}`
 }
 
-// Colores de la etiqueta del estado del pago
-const STATUS_STYLES = {
+// AI-assisted: see docs/AI_LOG.md #25
+// Colores de la etiqueta del estado del pago (se exportan para reutilizarlos en el resumen del viaje)
+export const PAYMENT_STATUS_STYLES = {
   approved: { background: colors.successSoft, text: colors.success },
   pending: { background: colors.warningSoft, text: colors.textSecondary },
   rejected: { background: colors.errorSoft, text: colors.error },
@@ -26,7 +27,7 @@ const STATUS_STYLES = {
 export default function TripItem({ trip, onPress }) {
   const { t, language } = useLanguage()
   const locale = language === 'en' ? 'en-US' : 'es-CO'
-  const statusStyle = STATUS_STYLES[trip.paymentStatus] ?? STATUS_STYLES.cash
+  const statusStyle = PAYMENT_STATUS_STYLES[trip.paymentStatus] ?? PAYMENT_STATUS_STYLES.cash
 
   return (
     <Pressable

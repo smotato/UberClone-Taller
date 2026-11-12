@@ -5,6 +5,8 @@ import MapView, { Marker, Polyline } from 'react-native-maps'
 import { colors, spacing, radius, typography, shadows } from '../theme/theme'
 import useLanguage from '../hooks/useLanguage'
 import { InfoRow } from '../components/profile/ProfileInfo'
+// AI-assisted: see docs/AI_LOG.md #25
+import RouteAttribution from '../components/trip/RouteAttribution'
 import { formatTripDate } from '../components/history/TripItem'
 import { formatCurrency } from '../utils/formatCurrency'
 import { decodePolyline } from '../utils/polyline'
@@ -72,6 +74,7 @@ export default function TripDetailScreen({ route }) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.card}>
         {hasMap ? (
+          <View>
           <MapView
             ref={mapRef}
             style={styles.map}
@@ -89,6 +92,10 @@ export default function TripDetailScreen({ route }) {
             {origin ? <Marker coordinate={origin} pinColor={colors.success} /> : null}
             {destination ? <Marker coordinate={destination} pinColor={colors.error} /> : null}
           </MapView>
+          {/* AI-assisted: see docs/AI_LOG.md #25 */}
+          {/* Atribución de los datos de la ruta, solo cuando se dibuja una ruta */}
+          {routeCoordinates.length >= 2 ? <RouteAttribution /> : null}
+          </View>
         ) : null}
         {routeCoordinates.length < 2 ? <Text style={styles.noRoute}>{t('tripDetail.noRoute')}</Text> : null}
       </View>

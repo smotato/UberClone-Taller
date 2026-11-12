@@ -44,9 +44,10 @@ export function encodePolyline(points, maxPoints = MAX_ROUTE_POINTS) {
   }).join('')
 }
 
-// Cadena -> lista de { lat, lng }. Con una cadena ausente, vacía o inválida devuelve [] sin lanzar error
-export function decodePolyline(encoded) {
-  if (typeof encoded !== 'string' || encoded.length === 0 || encoded.length > MAX_ENCODED_LENGTH) return []
+// Cadena -> lista de { lat, lng }. Con una cadena ausente, vacía o inválida devuelve [] sin lanzar error.
+// maxLength: largo máximo aceptado. Las rutas guardadas son cortas (por defecto); las que devuelve el proveedor de rutas son más largas
+export function decodePolyline(encoded, maxLength = MAX_ENCODED_LENGTH) {
+  if (typeof encoded !== 'string' || encoded.length === 0 || encoded.length > maxLength) return []
 
   const points = []
   let index = 0

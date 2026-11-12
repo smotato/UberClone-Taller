@@ -8,7 +8,8 @@ import useSession from '../hooks/useSession'
 import useEarnings from '../hooks/useEarnings'
 import BalanceCard from '../components/earnings/BalanceCard'
 import PeriodCard from '../components/earnings/PeriodCard'
-import { addDemoTrips, removeDemoTrips } from '../services/tripServices'
+// AI-assisted: see docs/AI_LOG.md #25
+import { addDemoTrips, removeDemoTrips, createDemoRequest } from '../services/tripServices'
 import { buildDemoTrips } from '../utils/demoTrips'
 
 // Ganancias: saldo y totales de hoy, esta semana y este mes (solo viajes pagados).
@@ -48,6 +49,25 @@ export default function EarningsScreen() {
       setDemoBusy(false)
     }
   }, [driverId, t])
+
+  // AI-assisted: see docs/AI_LOG.md #25
+  // Solo desarrollo: crea una solicitud de viaje de ejemplo para este conductor (no hay app de pasajero).
+  // Para recibirla hay que estar aprobado y disponible. La categoría es la del vehículo del conductor
+  const handleSimulateRequest = useCallback(async (paymentMethod) => {
+    setDemoBusy(true)
+    try {
+      await createDemoRequest(driverId, {
+        base: driver?.location ?? null,
+        category: driver?.vehicle?.category,
+        paymentMethod,
+      })
+      Alert.alert(t('dev.simulateDone'))
+    } catch {
+      Alert.alert(t('dev.simulateError'))
+    } finally {
+      setDemoBusy(false)
+    }
+  }, [driverId, driver, t])
 
   return (
     <ScrollView
@@ -104,6 +124,23 @@ export default function EarningsScreen() {
             accessibilityRole="button"
           >
             <Text style={styles.demoText}>{t('earnings.removeDemo')}</Text>
+          </Pressable>
+          {/* AI-assisted: see docs/AI_LOG.md #25 */}
+          <Pressable
+            style={[styles.demoButton, demoBusy && styles.demoButtonDisabled]}
+            onPress={() => handleSimulateRequest('cash')}
+            disabled={demoBusy}
+            accessibilityRole="button"
+          >
+            <Text style={styles.demoText}>{t('dev.simulateCash')}</Text>
+          </Pressable>
+          <Pressable
+            style={[styles.demoButton, demoBusy && styles.demoButtonDisabled]}
+            onPress={() => handleSimulateRequest('mercadopago')}
+            disabled={demoBusy}
+            accessibilityRole="button"
+          >
+            <Text style={styles.demoText}>{t('dev.simulateGateway')}</Text>
           </Pressable>
         </View>
       ) : null}

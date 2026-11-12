@@ -263,6 +263,56 @@ export default {
     rejected: 'Rejected',
     cash: 'Cash',
   },
+  // AI-assisted: see docs/AI_LOG.md #25
+  request: {
+    title: 'New trip request',
+    pickup: 'Pickup',
+    destination: 'Destination',
+    distance: 'Distance',
+    duration: 'Duration',
+    category: 'Category',
+    paymentMethod: 'Payment method',
+    estimatedFare: 'Estimated fare',
+    estimatedEarnings: 'Your estimated net earnings',
+    calculating: 'Calculating...',
+    accept: 'Accept',
+    reject: 'Decline',
+    unavailable: 'This request is no longer available.',
+    acceptError: "We couldn't accept the request. Check your connection and try again.",
+    rejectError: "We couldn't decline the request. Check your connection.",
+  },
+  // AI-assisted: see docs/AI_LOG.md #25
+  tripFlow: {
+    startPickup: 'Head to the passenger',
+    toPickup: 'On the way to the passenger',
+    toDestination: 'On the way to the destination',
+    passengerOnBoard: 'Passenger on board',
+    finishTrip: 'Finish trip',
+    cancelTrip: 'Cancel trip',
+    cancelConfirm: 'Cancel this trip?',
+    cancelledByPassenger: 'The passenger cancelled the trip.',
+    routeUnavailable: "We couldn't draw the route. You can continue with the trip.",
+    transitionError: "We couldn't update the trip. Check your connection and try again.",
+    tripUnavailable: "We couldn't load the trip.",
+  },
+  // AI-assisted: see docs/AI_LOG.md #25
+  tripSummary: {
+    title: 'Trip summary',
+    finalFare: 'Final fare',
+    collectCash: 'Cash payment received',
+    waitingGateway: 'Waiting for the payment gateway to confirm.',
+    backHome: 'Back to home',
+  },
+  // AI-assisted: see docs/AI_LOG.md #25
+  // Development only: testing tools without the passenger app
+  dev: {
+    simulateCash: 'Simulate request (cash)',
+    simulateGateway: 'Simulate request (gateway)',
+    simulateApproved: 'Simulate approved payment',
+    simulateRejected: 'Simulate rejected payment',
+    simulateDone: 'Sample request created. Go available to receive it.',
+    simulateError: "The sample request couldn't be created.",
+  },
   profile: {
     title: 'Profile and settings',
     personal: 'Personal data',

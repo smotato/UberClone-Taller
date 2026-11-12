@@ -9,6 +9,9 @@ import DriverDrawer from './DriverDrawer'
 import RegistrationTabs from './RegistrationTabs'
 // AI-assisted: see docs/AI_LOG.md #23
 import TripDetailScreen from '../screens/TripDetailScreen'
+import IncomingRequestScreen from '../screens/IncomingRequestScreen'
+import TripInProgressScreen from '../screens/TripInProgressScreen'
+import TripSummaryScreen from '../screens/TripSummaryScreen'
 import useLanguage from '../hooks/useLanguage'
 import { colors, typography } from '../theme/theme'
 
@@ -47,6 +50,24 @@ export default function RootNavigator() {
               headerTintColor: colors.textOnPrimary,
               headerTitleStyle: typography.subtitle,
             }}
+          />
+          {/* AI-assisted: see docs/AI_LOG.md #25 */}
+          {/* Flujo del viaje: sin cabecera ni gestos para salir, porque el conductor debe decidir o terminar el viaje.
+              Las pantallas se muestran por el estado del viaje (TripContext), no desde otros botones */}
+          <Stack.Screen
+            name="IncomingRequest"
+            component={IncomingRequestScreen}
+            options={{ headerShown: false, gestureEnabled: false, animation: 'slide_from_bottom' }}
+          />
+          <Stack.Screen
+            name="TripInProgress"
+            component={TripInProgressScreen}
+            options={{ headerShown: false, gestureEnabled: false }}
+          />
+          <Stack.Screen
+            name="TripSummary"
+            component={TripSummaryScreen}
+            options={{ headerShown: false, gestureEnabled: false }}
           />
         </Stack.Group>
       )}
