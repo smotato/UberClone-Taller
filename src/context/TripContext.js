@@ -4,6 +4,8 @@ import { Alert } from 'react-native'
 import useLanguage from '../hooks/useLanguage'
 import useSession from '../hooks/useSession'
 import useTripRequests from '../hooks/useTripRequests'
+// AI-assisted: see docs/AI_LOG.md #31
+import useRequestNotifications from '../hooks/useRequestNotifications'
 import { listenTrip, findActiveTrip, transitionTrip } from '../services/tripServices'
 // AI-assisted: see docs/AI_LOG.md #29
 import { createPaymentIntent, confirmPayment } from '../services/paymentsServices'
@@ -61,6 +63,10 @@ export function TripProvider({ children }) {
   const requestsEnabled = loggedIn && isApproved && driver?.isAvailable === true && !activeTrip && !restoring
   const requests = useTripRequests({ enabled: requestsEnabled, driverId })
   const request = requests.request
+
+  // AI-assisted: see docs/AI_LOG.md #31
+  // Notificación local si llega una solicitud con la app fuera de primer plano
+  useRequestNotifications({ enabled: requestsEnabled, request, t })
 
   // Al cerrar sesión se limpia todo
   useEffect(() => {

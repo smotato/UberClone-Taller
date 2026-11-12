@@ -263,6 +263,12 @@ export default {
     cash: 'Cash',
   },
   // AI-assisted: see docs/AI_LOG.md #25
+  // AI-assisted: see docs/AI_LOG.md #31
+  notifications: {
+    newRequestTitle: 'New trip request',
+    newRequestBody: 'Destination:',
+    newRequestBodyNoDestination: 'Open the app to see it and respond.',
+  },
   request: {
     title: 'New trip request',
     pickup: 'Pickup',

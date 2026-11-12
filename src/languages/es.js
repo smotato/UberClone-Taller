@@ -263,6 +263,12 @@ export default {
     cash: 'Efectivo',
   },
   // AI-assisted: see docs/AI_LOG.md #25
+  // AI-assisted: see docs/AI_LOG.md #31
+  notifications: {
+    newRequestTitle: 'Nueva solicitud de viaje',
+    newRequestBody: 'Destino:',
+    newRequestBodyNoDestination: 'Abre la app para verla y responder.',
+  },
   request: {
     title: 'Nueva solicitud de viaje',
     pickup: 'Recogida',
