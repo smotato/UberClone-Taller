@@ -29,9 +29,9 @@ export default function EarningsScreen() {
     setDemoBusy(true)
     try {
       await addDemoTrips(driverId, buildDemoTrips({ driverId, base: driver?.location ?? null }))
-      Alert.alert(t('earnings.demoLoaded'))
+      Alert.alert(t('earnings.demoTitle'), t('earnings.demoLoaded'))
     } catch {
-      Alert.alert(t('earnings.demoError'))
+      Alert.alert(t('earnings.demoTitle'), t('earnings.demoError'))
     } finally {
       setDemoBusy(false)
     }
@@ -42,9 +42,9 @@ export default function EarningsScreen() {
     setDemoBusy(true)
     try {
       await removeDemoTrips(driverId)
-      Alert.alert(t('earnings.demoRemoved'))
+      Alert.alert(t('earnings.demoTitle'), t('earnings.demoRemoved'))
     } catch {
-      Alert.alert(t('earnings.demoError'))
+      Alert.alert(t('earnings.demoTitle'), t('earnings.demoError'))
     } finally {
       setDemoBusy(false)
     }
@@ -61,9 +61,9 @@ export default function EarningsScreen() {
         category: driver?.vehicle?.category,
         paymentMethod,
       })
-      Alert.alert(t('dev.simulateDone'))
+      Alert.alert(t('dev.simulateDoneTitle'), t('dev.simulateDone'))
     } catch {
-      Alert.alert(t('dev.simulateError'))
+      Alert.alert(t('dev.simulateErrorTitle'), t('dev.simulateError'))
     } finally {
       setDemoBusy(false)
     }

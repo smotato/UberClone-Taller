@@ -39,7 +39,8 @@ export default function TripSummaryScreen() {
   const notifyFailure = useCallback((code) => {
     if (code === 'busy') return
     const unavailable = code === 'unavailable' || code === 'not_found' || code === 'not_yours'
-    setTimeout(() => Alert.alert(t(unavailable ? 'request.unavailable' : 'tripFlow.transitionError')), ALERT_DELAY_MS)
+    const key = unavailable ? 'request.unavailable' : 'tripFlow.transitionError'
+    setTimeout(() => Alert.alert(t(`${key}Title`), t(key)), ALERT_DELAY_MS)
   }, [t])
 
   const handleCollectCash = useCallback(async () => {

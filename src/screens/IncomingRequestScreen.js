@@ -60,7 +60,8 @@ export default function IncomingRequestScreen() {
   // Avisa el error con un Alert después de ocultar el overlay
   const notifyFailure = useCallback((code, fallbackKey) => {
     const unavailable = code === 'unavailable' || code === 'not_found' || code === 'not_yours'
-    setTimeout(() => Alert.alert(t(unavailable ? 'request.unavailable' : fallbackKey)), ALERT_DELAY_MS)
+    const key = unavailable ? 'request.unavailable' : fallbackKey
+    setTimeout(() => Alert.alert(t(`${key}Title`), t(key)), ALERT_DELAY_MS)
   }, [t])
 
   const handleAccept = useCallback(async () => {

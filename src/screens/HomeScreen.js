@@ -229,7 +229,7 @@ export default function HomeScreen({ navigation }) {
           setAvailable(true)
         } catch (e) {
           setAvailable(false)
-          Alert.alert(t('home.availabilityError'))
+          Alert.alert(t('home.availabilityErrorTitle'), t('home.availabilityError'))
         }
       } else {
         // Se apaga primero en pantalla para detener el seguimiento de inmediato
@@ -250,7 +250,7 @@ export default function HomeScreen({ navigation }) {
             if (attempt < AVAILABILITY_OFF_ATTEMPTS - 1) await wait(AVAILABILITY_OFF_RETRY_MS)
           }
         }
-        if (!saved) Alert.alert(t('home.availabilityError'))
+        if (!saved) Alert.alert(t('home.availabilityErrorTitle'), t('home.availabilityError'))
       }
     } finally {
       busy.current = false

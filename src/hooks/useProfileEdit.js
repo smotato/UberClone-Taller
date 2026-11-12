@@ -97,7 +97,7 @@ export default function useProfileEdit({ source, toDraft, getUpdate, validators,
     } catch {
       // Se oculta el overlay primero y la sección queda en edición con lo escrito
       setSaving(false)
-      setTimeout(() => Alert.alert(t('profile.saveError')), ALERT_DELAY_MS)
+      setTimeout(() => Alert.alert(t('profile.saveErrorTitle'), t('profile.saveError')), ALERT_DELAY_MS)
     }
   }, [saving, validators, isValid, dirty, onSave, draft, update, t, onEditingChange])
 

@@ -45,7 +45,8 @@ export default function TripInProgressScreen() {
   const notifyFailure = useCallback((code) => {
     if (code === 'busy') return
     const unavailable = code === 'unavailable' || code === 'not_found' || code === 'not_yours'
-    Alert.alert(t(unavailable ? 'request.unavailable' : 'tripFlow.transitionError'))
+    const key = unavailable ? 'request.unavailable' : 'tripFlow.transitionError'
+    Alert.alert(t(`${key}Title`), t(key))
   }, [t])
 
   // Al llegar a la pantalla con el viaje aceptado, pasa solo a "hacia la recogida" (una vez por viaje).

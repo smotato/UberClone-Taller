@@ -114,7 +114,7 @@ export function TripProvider({ children }) {
   // Un viaje cancelado se limpia; si lo canceló el pasajero, se avisa
   useEffect(() => {
     if (activeTrip?.status !== 'cancelled') return
-    if (!selfCancelRef.current) Alert.alert(tRef.current('tripFlow.cancelledByPassenger'))
+    if (!selfCancelRef.current) Alert.alert(tRef.current('tripFlow.cancelledByPassengerTitle'), tRef.current('tripFlow.cancelledByPassenger'))
     selfCancelRef.current = false
     setActiveTrip(null)
   }, [activeTrip?.status])
@@ -164,7 +164,7 @@ export function TripProvider({ children }) {
         if (navigationRef.isReady()) navigationRef.navigate('Main')
         // Si la solicitud desapareció sin que el conductor hiciera nada (cancelada o tomada), se avisa
         if (from === 'IncomingRequest' && Date.now() > ownActionUntilRef.current) {
-          Alert.alert(tRef.current('request.unavailable'))
+          Alert.alert(tRef.current('request.unavailableTitle'), tRef.current('request.unavailable'))
         }
       }, HOME_DELAY_MS)
       return () => clearTimeout(homeTimerRef.current)

@@ -24,8 +24,9 @@ export default function PayWithCardButton() {
   // También bloquea el botón mientras la hoja de pago está abierta (ahí el contexto no está ocupado)
   const runningRef = useRef(false)
 
+  // Recibe la clave base: el título es `${key}Title` y la descripción es `key`
   const notify = useCallback((key) => {
-    setTimeout(() => Alert.alert(t(key)), UI_DELAY_MS)
+    setTimeout(() => Alert.alert(t(`${key}Title`), t(key)), UI_DELAY_MS)
   }, [t])
 
   const failureKey = useCallback((code) => {
