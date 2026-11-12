@@ -51,6 +51,12 @@ export const uploadVehiclePhoto = (idDriver, uri) =>
 export const uploadSoatPhoto = (idDriver, uri) =>
     uploadImage(uri, `drivers/${idDriver}/soatPhoto.jpg`)
 
+// AI-assisted: see docs/AI_LOG.md #22
+// Sube una foto renovada con un public_id único (marca de tiempo del celular): un preset sin firma
+// no garantiza poder sobrescribir el archivo anterior, así que cada renovación crea una imagen nueva
+export const uploadRenewedPhoto = (idDriver, name, uri) =>
+    uploadImage(uri, `drivers/${idDriver}/${name}-${Date.now()}.jpg`)
+
 // La revisión técnico-mecánica es opcional según el año del vehículo: sin foto devuelve null
 export const uploadInspectionPhoto = (idDriver, uri) =>
     uri ? uploadImage(uri, `drivers/${idDriver}/inspectionPhoto.jpg`) : Promise.resolve(null)

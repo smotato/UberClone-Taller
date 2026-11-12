@@ -57,31 +57,41 @@ export const getDriver = async (idDriver) => {
     return snap.exists() ? { id: snap.id, ...snap.data() } : null;
 };
 
-export const updateDriver = async (idDriver, driver) => {
-    await updateDoc(doc(db, COLLECTION, idDriver), {
-        language: driver.language,
-        vehicle: {
-            category: driver.vehicle.category,
-            plate: driver.vehicle.plate,
-            brand: driver.vehicle.brand,
-            model: driver.vehicle.model,
-            year: driver.vehicle.year,
-            color: driver.vehicle.color,
-            capacity: driver.vehicle.capacity,
-            vehiclePhotoURL: driver.vehicle.vehiclePhotoURL,
-        },
-        documents: {
-            licenseNumber: driver.documents.licenseNumber,
-            licensePhoto: driver.documents.licensePhoto,
-            licenseExpiry: driver.documents.licenseExpiry,
-            soatPhoto: driver.documents.soatPhoto,
-            soatExpiry: driver.documents.soatExpiry,
-            inspectionPhoto: driver.documents.inspectionPhoto,
-            inspectionExpiry: driver.documents.inspectionExpiry,
-            mercadoPagoEmail: driver.documents.mercadoPagoEmail,
-        },
+// AI-assisted: see docs/AI_LOG.md #22
+// Campos que el perfil nunca debe modificar; "vehicle" cubre también cualquier "vehicle.*"
+const PROTECTED_FIELDS = [
+    'status', 'isAvailable', 'location', 'locationUpdatedAt', 'createdAt', 'termsAcceptedAt',
+    'idNumber', 'birthDate', 'fullName', 'gender', 'profilePhotoURL',
+    'vehicle', 'documents.licenseNumber',
+]
+
+// Tiempo máximo de espera de la escritura del perfil
+const PROFILE_WRITE_TIMEOUT_MS = 10000
+
+const isProtectedField =(field) =>
+    PROTECTED_FIELDS.some((blocked) => field === blocked || field.startsWith(`${blocked}.`))
+
+// Actualiza solo los campos recibidos, con rutas con punto (p. ej. 'documents.soatExpiry'),
+// en un único updateDoc. updatedAt usa la hora del celular, como el resto del archivo
+export const updateDriverProfile = async (idDriver, fields) => {
+    const allowed = Object.fromEntries(
+        Object.entries(fields).filter(([field]) => !isProtectedField(field))
+    )
+    if (Object.keys(allowed).length === 0) return
+    const write = updateDoc(doc(db, COLLECTION, idDriver), {
+        ...allowed,
         updatedAt: Date.now(),
     });
+    // Sin red, updateDoc no falla: queda esperando. Se corta la espera para poder avisar el error
+    let timer
+    const timeout = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error('Tiempo de espera agotado al guardar')), PROFILE_WRITE_TIMEOUT_MS)
+    })
+    try {
+        await Promise.race([write, timeout])
+    } finally {
+        clearTimeout(timer)
+    }
 };
 
 export const removeDriver = async (idDriver) => {

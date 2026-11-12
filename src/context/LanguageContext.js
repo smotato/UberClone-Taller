@@ -1,8 +1,10 @@
 // AI-assisted: see docs/AI_LOG.md #5
 
-import { createContext, useCallback, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import es from '../languages/es'
 import en from '../languages/en'
+// AI-assisted: see docs/AI_LOG.md #22
+import useStorage from '../hooks/useStorage'
 
 // Diccionarios disponibles, indexados por el código de idioma
 const translations = { es, en }
@@ -11,7 +13,29 @@ export const LanguageContext = createContext(null)
 
 export  function LanguageProvider({ children }) {
   // Idioma por defecto: español
-  const [language, setLanguage] = useState('es')
+  const [language, setLanguageState] = useState('es')
+
+  // AI-assisted: see docs/AI_LOG.md #22
+  const storage = useStorage()
+  // Evita el parpadeo del idioma por defecto: no se muestra nada hasta leer el idioma guardado
+  const [loaded, setLoaded] = useState(false)
+
+  // Al montar, lee y aplica el idioma guardado en el celular (si falla, queda el de por defecto)
+  useEffect(() => {
+    let cancelled = false
+    storage.getLanguage()
+      .then((saved) => { if (!cancelled && saved) setLanguageState(saved) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoaded(true) })
+    return () => { cancelled = true }
+  }, [storage])
+
+  // Cambia el idioma al instante y lo guarda como preferencia (el guardado es de mejor esfuerzo)
+  const setLanguage = useCallback((next) => {
+    if (next !== 'es' && next !== 'en') return
+    setLanguageState(next)
+    storage.saveLanguage(next).catch(() => {})
+  }, [storage])
 
   // Convierte una clave como 'registration.personal.fullName' en su texto.
   // Si la clave no existe devuelve la propia clave, así se nota de inmediato qué falta.
@@ -28,8 +52,11 @@ export  function LanguageProvider({ children }) {
   // useMemo evita que todos los consumidores se redibujen si el valor no cambió
   const value = useMemo(
     () => ({ language, setLanguage, t }),
-    [language, t]
+    [language, setLanguage, t]
   )
+
+  // AI-assisted: see docs/AI_LOG.md #22
+  if (!loaded) return null
 
   return (
     <LanguageContext.Provider value={value}>

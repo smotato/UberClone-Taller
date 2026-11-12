@@ -10,7 +10,14 @@ export const STORAGE_KEYS = {
   session: '@uberclone/session',
   // Solo el indicador de disponibilidad, nunca la ubicación
   lastAvailability: '@uberclone/lastAvailability',
+  // AI-assisted: see docs/AI_LOG.md #22
+  // Preferencia de idioma: solo 'es' o 'en'
+  language: '@uberclone/language',
 }
+
+// AI-assisted: see docs/AI_LOG.md #22
+// Idiomas válidos para la preferencia guardada
+const VALID_LANGUAGES = ['es', 'en']
 
 // No captura errores: se dejan propagar para que SessionContext los maneje
 export default function useStorage() {
@@ -33,5 +40,17 @@ export default function useStorage() {
         ? AsyncStorage.setItem(STORAGE_KEYS.lastAvailability, 'true')
         : AsyncStorage.removeItem(STORAGE_KEYS.lastAvailability)
     ),
+    // AI-assisted: see docs/AI_LOG.md #22
+    // Devuelve el idioma guardado, o null si no hay o el valor no es válido
+    getLanguage: async () => {
+      const saved = await AsyncStorage.getItem(STORAGE_KEYS.language)
+      return VALID_LANGUAGES.includes(saved) ? saved : null
+    },
+    // Solo guarda idiomas válidos; cualquier otro valor se ignora
+    saveLanguage: async (language) => {
+      if (VALID_LANGUAGES.includes(language)) {
+        await AsyncStorage.setItem(STORAGE_KEYS.language, language)
+      }
+    },
   }), [])
 }
