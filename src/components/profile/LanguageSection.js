@@ -1,7 +1,7 @@
 // AI-assisted: see docs/AI_LOG.md #22
 import React, { useCallback, useEffect, useState } from 'react'
 import useLanguage from '../../hooks/useLanguage'
-import { updateDriverProfile } from '../../services/dbServices'
+import { updateDriverProfile } from '../../services/driverServices'
 import { LANGUAGE_OPTIONS } from '../../data/options'
 import SelectField from '../forms/SelectField'
 import ProfileSection from './ProfileSection'

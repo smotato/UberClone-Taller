@@ -358,6 +358,10 @@ No se guardan números de cuenta bancaria ni de tarjeta, ni en la app ni en Asyn
   mientras la posición en pantalla se actualiza con más frecuencia.
 - **Sin Firebase Authentication.** El inicio de sesión compara correo y documento contra el
   documento de Firestore (ver advertencia en [Cómo funciona la app](#cómo-funciona-la-app)).
+- **La semana empieza el lunes.** En Ganancias e Historial, "Hoy", "Semana" y "Mes" se calculan
+  con la hora del celular (no la del servidor): el día desde las 00:00, la semana desde el lunes
+  a las 00:00 y el mes desde el día 1 a las 00:00. Ambas pantallas usan la misma regla y asignan
+  cada viaje a un periodo según su `completedAt`.
 - **Dependencias del Drawer:** `react-native-reanimated`, `react-native-worklets` y
   `react-native-gesture-handler` son requisitos de `@react-navigation/drawer`; no se usan
   directamente.

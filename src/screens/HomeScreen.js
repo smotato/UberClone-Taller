@@ -12,7 +12,7 @@ import useLanguage from '../hooks/useLanguage'
 import useSession from '../hooks/useSession'
 import useStorage from '../hooks/useStorage'
 import useDriverLocation from '../hooks/useDriverLocation'
-import { setDriverAvailability, updateDriverLocation } from '../services/dbServices'
+import { setDriverAvailability, updateDriverLocation } from '../services/driverServices'
 
 // Tamaños puntuales que no existen en el tema
 const FAB_SIZE = 48

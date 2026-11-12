@@ -10,7 +10,7 @@ import useRegistration from '../hooks/useRegistration'
 import useSession from '../hooks/useSession'
 import { buildDriver } from '../utils/buildDriver'
 import LoadingOverlay from './LoadingOverlay'
-import { addDriver, idNumberExists, newDriverId } from '../services/dbServices'
+import { addDriver, idNumberExists, newDriverId } from '../services/driverServices'
 import {
   uploadProfilePhoto,
   uploadVehiclePhoto,

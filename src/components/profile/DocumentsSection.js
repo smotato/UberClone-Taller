@@ -4,7 +4,7 @@ import { View, Text, TextInput, StyleSheet } from 'react-native'
 import { colors, spacing, radius, typography, sizes } from '../../theme/theme'
 import useLanguage from '../../hooks/useLanguage'
 import useProfileEdit from '../../hooks/useProfileEdit'
-import { updateDriverProfile } from '../../services/dbServices'
+import { updateDriverProfile } from '../../services/driverServices'
 import { uploadRenewedPhoto } from '../../services/storageServices'
 import {
   documentsToDraft,

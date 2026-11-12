@@ -36,3 +36,21 @@ export const COLOR_OPTIONS = [
   { value: 'yellow', labelKey: 'options.color.yellow' },
   { value: 'other', labelKey: 'options.color.other' },
 ]
+
+// AI-assisted: see docs/AI_LOG.md #23
+// Filtro del Historial por método de pago; 'all' no filtra
+export const PAYMENT_METHOD_OPTIONS = [
+  { value: 'all', labelKey: 'history.paymentAll' },
+  { value: 'cash', labelKey: 'history.paymentCash' },
+  { value: 'mercadopago', labelKey: 'history.paymentMercadoPago' },
+  { value: 'stripe', labelKey: 'history.paymentStripe' },
+]
+
+// AI-assisted: see docs/AI_LOG.md #23
+// Filtro del Historial por periodo; 'custom' habilita el rango de fechas
+export const PERIOD_OPTIONS = [
+  { value: 'today', labelKey: 'history.periodToday' },
+  { value: 'week', labelKey: 'history.periodWeek' },
+  { value: 'month', labelKey: 'history.periodMonth' },
+  { value: 'custom', labelKey: 'history.periodCustom' },
+]
