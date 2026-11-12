@@ -8,7 +8,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '../config/firebaseConfig'
 import { assertTripAmounts } from '../utils/calculateFare'
-import { GATEWAY_METHODS, CASH_METHOD } from '../utils/earningsSummary'
+import { GATEWAY_METHOD, CASH_METHOD } from '../utils/earningsSummary'
 // AI-assisted: see docs/AI_LOG.md #25
 import { isActiveTrip } from '../utils/tripStateMachine'
 import { ACTIVE_STATUSES, PROTECTED_TRIP_FIELDS, WRITE_TIMEOUT_MS } from '../config/tripFlow'
@@ -104,32 +104,30 @@ export async function fetchTripsPage(driverId, { from, to, paymentMethod = null,
 }
 
 // Saldo del conductor sobre TODOS sus viajes 'paid' (no sobre lo paginado), con agregaciones del servidor:
-//   saldo = ganancias de mercadopago + ganancias de stripe - comisiones en efectivo.
-// Son cuatro consultas en paralelo; si una falla, toda la función lanza error (nunca devuelve un total parcial).
-// La cuarta cuenta todos los viajes 'paid' para detectar descuadre (p. ej. un paymentMethod distinto de los tres).
+//   saldo = ganancias de stripe - comisiones en efectivo.
+// Son tres consultas en paralelo; si una falla, toda la función lanza error (nunca devuelve un total parcial).
+// La tercera cuenta todos los viajes 'paid' para detectar descuadre (p. ej. un paymentMethod distinto de los dos).
 // Las agregaciones solo funcionan en línea y no admiten listeners: hay que volver a llamarla para actualizar.
 // Devuelve { balance, paidCount, coveredCount, mismatch }
 export async function getTripsBalance(driverId) {
   const paid = () => [where('driverId', '==', driverId), where('status', '==', 'paid')]
   const byMethod = (method) => query(tripsRef(), ...paid(), where('paymentMethod', '==', method))
-  const [method1, method2] = GATEWAY_METHODS
 
   try {
-    const [first, second, cash, all] = await Promise.all([
-      getAggregateFromServer(byMethod(method1), { earnings: sum('driverEarnings'), trips: count() }),
-      getAggregateFromServer(byMethod(method2), { earnings: sum('driverEarnings'), trips: count() }),
+    // AI-assisted: see docs/AI_LOG.md #29
+    const [gateway, cash, all] = await Promise.all([
+      getAggregateFromServer(byMethod(GATEWAY_METHOD), { earnings: sum('driverEarnings'), trips: count() }),
       getAggregateFromServer(byMethod(CASH_METHOD), { commissions: sum('commission'), trips: count() }),
       getAggregateFromServer(query(tripsRef(), ...paid()), { trips: count() }),
     ])
 
-    const firstData = first.data()
-    const secondData = second.data()
+    const gatewayData = gateway.data()
     const cashData = cash.data()
     const paidCount = all.data().trips
-    const coveredCount = firstData.trips + secondData.trips + cashData.trips
+    const coveredCount = gatewayData.trips + cashData.trips
 
     return {
-      balance: firstData.earnings + secondData.earnings - cashData.commissions,
+      balance: gatewayData.earnings - cashData.commissions,
       paidCount,
       coveredCount,
       mismatch: paidCount !== coveredCount,
@@ -284,7 +282,7 @@ export async function transitionTrip(tripId, driverId, expectedFrom, fields, { t
 // ---------- Solo desarrollo: solicitudes de ejemplo ----------
 
 const DEMO_CATEGORIES = ['economy', 'xl', 'premium']
-const DEMO_PAYMENT_METHODS = ['cash', 'mercadopago', 'stripe']
+const DEMO_PAYMENT_METHODS = ['cash', 'stripe']
 const DEMO_ADDRESSES = [
   'Calle 5 # 38-20 (ejemplo)', 'Carrera 100 # 14-30 (ejemplo)', 'Avenida 6N # 25-10 (ejemplo)',
   'Calle 9 # 24-50 (ejemplo)', 'Carrera 1 # 62-40 (ejemplo)', 'Avenida Roosevelt # 23-15 (ejemplo)',

@@ -18,21 +18,21 @@ const ADDRESSES = [
 // Plan de los 15 viajes. slot: en qué periodo caen. Los 'completed' con pago pendiente o rechazado no suman dinero.
 // Dos viajes no llevan ruta (route: null) para probar ese caso en el detalle.
 const BLUEPRINTS = [
-  { slot: 'today', category: 'economy', method: 'mercadopago', status: 'paid', tip: 2000, rating: 5, hasRoute: true },
+  { slot: 'today', category: 'economy', method: 'stripe', status: 'paid', tip: 2000, rating: 5, hasRoute: true },
   { slot: 'today', category: 'xl', method: 'cash', status: 'paid', tip: 0, rating: 4, hasRoute: true },
   { slot: 'today', category: 'economy', method: 'stripe', status: 'completed', paymentStatus: 'pending', tip: 0, rating: null, hasRoute: true },
-  { slot: 'week', category: 'premium', method: 'mercadopago', status: 'paid', tip: 5000, rating: 5, hasRoute: true },
+  { slot: 'week', category: 'premium', method: 'stripe', status: 'paid', tip: 5000, rating: 5, hasRoute: true },
   { slot: 'week', category: 'economy', method: 'cash', status: 'paid', tip: 1000, rating: 4, hasRoute: false },
   { slot: 'week', category: 'xl', method: 'stripe', status: 'paid', tip: 0, rating: null, hasRoute: true },
-  { slot: 'week', category: 'economy', method: 'mercadopago', status: 'completed', paymentStatus: 'rejected', tip: 0, rating: 3, hasRoute: true },
+  { slot: 'week', category: 'economy', method: 'stripe', status: 'completed', paymentStatus: 'rejected', tip: 0, rating: 3, hasRoute: true },
   { slot: 'month', category: 'economy', method: 'cash', status: 'paid', tip: 0, rating: 5, hasRoute: true },
   { slot: 'month', category: 'premium', method: 'stripe', status: 'paid', tip: 3000, rating: 4, hasRoute: true },
-  { slot: 'month', category: 'xl', method: 'mercadopago', status: 'paid', tip: 0, rating: 3, hasRoute: false },
+  { slot: 'month', category: 'xl', method: 'stripe', status: 'paid', tip: 0, rating: 3, hasRoute: false },
   { slot: 'month', category: 'economy', method: 'cash', status: 'paid', tip: 500, rating: 5, hasRoute: true },
-  { slot: 'older', category: 'economy', method: 'mercadopago', status: 'paid', tip: 0, rating: 4, hasRoute: true },
+  { slot: 'older', category: 'economy', method: 'stripe', status: 'paid', tip: 0, rating: 4, hasRoute: true },
   { slot: 'older', category: 'xl', method: 'cash', status: 'paid', tip: 2000, rating: 5, hasRoute: true },
   { slot: 'older', category: 'premium', method: 'stripe', status: 'paid', tip: 0, rating: 5, hasRoute: true },
-  { slot: 'older', category: 'economy', method: 'mercadopago', status: 'completed', paymentStatus: 'pending', tip: 0, rating: null, hasRoute: true },
+  { slot: 'older', category: 'economy', method: 'stripe', status: 'completed', paymentStatus: 'pending', tip: 0, rating: null, hasRoute: true },
 ]
 
 const MINUTE = 60 * 1000

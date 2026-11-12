@@ -5,7 +5,8 @@ import { startOfToday, startOfWeek, startOfMonth, endOfDay } from './dateRanges'
 // Solo cuentan los viajes con status 'paid'; un viaje 'completed' con pago pendiente o rechazado no suma dinero.
 
 // Métodos de pago que cubre el saldo
-export const GATEWAY_METHODS = ['mercadopago', 'stripe']
+// AI-assisted: see docs/AI_LOG.md #29
+export const GATEWAY_METHOD = 'stripe'
 export const CASH_METHOD = 'cash'
 
 const toNumber = (value) => (typeof value === 'number' && Number.isFinite(value) ? value : 0)
@@ -56,12 +57,12 @@ export function splitByPeriod(trips, now = new Date()) {
 // La pantalla usa las agregaciones de Firestore; esta versión sirve para pruebas y listas ya cargadas
 export function computeBalance(trips) {
   return (trips ?? []).filter(isCountable).reduce((balance, trip) => {
-    if (GATEWAY_METHODS.includes(trip.paymentMethod)) return balance + toNumber(trip.driverEarnings)
+    if (trip.paymentMethod === GATEWAY_METHOD) return balance + toNumber(trip.driverEarnings)
     if (trip.paymentMethod === CASH_METHOD) return balance - toNumber(trip.commission)
     return balance
   }, 0)
 }
 
-// Descuadre del saldo: hay viajes 'paid' que las tres consultas (mercadopago, stripe y cash) no cubren,
+// Descuadre del saldo: hay viajes 'paid' que las consultas (stripe y cash) no cubren,
 // por ejemplo con un paymentMethod distinto. Compara el conteo total contra la suma de lo cubierto
 export const hasBalanceMismatch = (totalPaidCount, coveredCount) => totalPaidCount !== coveredCount

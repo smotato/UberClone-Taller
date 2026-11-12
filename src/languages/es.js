@@ -227,7 +227,6 @@ export default {
     periodCustom: 'Rango',
     paymentAll: 'Todos',
     paymentCash: 'Efectivo',
-    paymentMercadoPago: 'Mercado Pago',
     paymentStripe: 'Stripe',
     from: 'Desde',
     to: 'Hasta',
@@ -302,6 +301,18 @@ export default {
     collectCash: 'Cobro recibido en efectivo',
     waitingGateway: 'Esperando la confirmación de la pasarela de pago.',
     backHome: 'Volver al inicio',
+  },
+  // AI-assisted: see docs/AI_LOG.md #29
+  // Cobro con tarjeta (Stripe)
+  payment: {
+    payWithCard: 'Pagar con tarjeta',
+    processing: 'Procesando el pago...',
+    rejected: 'El pago fue rechazado. Puedes intentarlo de nuevo.',
+    pending: 'El pago aún no se confirma. Vuelve a intentarlo en un momento.',
+    serverUnreachable: 'No pudimos conectar con el servidor de pagos. Revisa que esté encendido y que estés en la misma red Wi-Fi.',
+    providerError: 'No pudimos procesar el pago. Inténtalo de nuevo.',
+    notPayable: 'Este viaje no se puede cobrar con tarjeta.',
+    merchantName: 'UberClone',
   },
   // AI-assisted: see docs/AI_LOG.md #25
   // Solo para desarrollo: herramientas de prueba sin la app del pasajero

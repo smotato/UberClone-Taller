@@ -42,7 +42,6 @@ export const COLOR_OPTIONS = [
 export const PAYMENT_METHOD_OPTIONS = [
   { value: 'all', labelKey: 'history.paymentAll' },
   { value: 'cash', labelKey: 'history.paymentCash' },
-  { value: 'mercadopago', labelKey: 'history.paymentMercadoPago' },
   { value: 'stripe', labelKey: 'history.paymentStripe' },
 ]
 

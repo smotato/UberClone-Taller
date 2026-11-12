@@ -5,6 +5,8 @@ import useLanguage from '../hooks/useLanguage'
 import useSession from '../hooks/useSession'
 import useTripRequests from '../hooks/useTripRequests'
 import { listenTrip, findActiveTrip, transitionTrip } from '../services/tripServices'
+// AI-assisted: see docs/AI_LOG.md #29
+import { createPaymentIntent, confirmPayment } from '../services/paymentsServices'
 import { getDistanceMatrix, getDirections } from '../services/routesServices'
 import { buildPatch, screenForTrip } from '../utils/tripStateMachine'
 import { navigationRef } from '../navigation/navigationRef'
@@ -260,6 +262,31 @@ export function TripProvider({ children }) {
     [runTransition]
   )
 
+  // AI-assisted: see docs/AI_LOG.md #29
+  // Cobro con tarjeta (Stripe, vía el servidor de pagos). Solo con un viaje terminado y de método 'stripe'.
+  // Ignoran toques repetidos; el estado final del viaje llega por listenTrip (la app nunca escribe 'paid')
+  const runPayment = useCallback(async (request) => {
+    if (!activeTrip || busyRef.current) return { ok: false, code: 'busy' }
+    if (activeTrip.status !== 'completed' || activeTrip.paymentMethod !== 'stripe') return { ok: false, code: 'not_payable' }
+    busyRef.current = true
+    setBusy(true)
+    try {
+      return await request(activeTrip.id)
+    } finally {
+      busyRef.current = false
+      setBusy(false)
+    }
+  }, [activeTrip])
+
+  const createCardPayment = useCallback(
+    (attemptId) => runPayment((tripId) => createPaymentIntent(tripId, attemptId)),
+    [runPayment]
+  )
+  const confirmCardPayment = useCallback(
+    (paymentIntentId) => runPayment((tripId) => confirmPayment(tripId, paymentIntentId)),
+    [runPayment]
+  )
+
   // Sale del resumen: se limpia el viaje y el controlador vuelve a Inicio
   const leaveSummary = useCallback(() => setActiveTrip(null), [])
 
@@ -283,10 +310,12 @@ export function TripProvider({ children }) {
       cancelTrip,
       collectCash,
       simulateGatewayResult,
+      createCardPayment,
+      confirmCardPayment,
       leaveSummary,
     }),
     [request, requests.receivedAt, requests.accepting, requests.rejecting, estimate, activeTrip, legs, loadLeg, restoring, busy,
-      accept, reject, startArriving, passengerOnBoard, finishTrip, cancelTrip, collectCash, simulateGatewayResult, leaveSummary]
+      accept, reject, startArriving, passengerOnBoard, finishTrip, cancelTrip, collectCash, simulateGatewayResult, createCardPayment, confirmCardPayment, leaveSummary]
   )
 
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>

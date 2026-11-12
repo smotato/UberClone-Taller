@@ -18,19 +18,20 @@ sobre el mapa, cobra en efectivo y consulta sus ganancias, su saldo y su histori
 5. [Variables de entorno](#variables-de-entorno)
 6. [Configuración de Firebase](#configuración-de-firebase)
 7. [Configuración de Cloudinary](#configuración-de-cloudinary)
-8. [Cómo aprobar a un conductor](#cómo-aprobar-a-un-conductor)
-9. [Cómo funciona la app](#cómo-funciona-la-app)
-10. [Reglas de validación del registro](#reglas-de-validación-del-registro)
-11. [Disponibilidad y ubicación](#disponibilidad-y-ubicación)
-12. [Flujo del viaje](#flujo-del-viaje)
-13. [Ganancias, historial y perfil](#ganancias-historial-y-perfil)
-14. [Herramientas de desarrollo](#herramientas-de-desarrollo)
-15. [Estructura del proyecto](#estructura-del-proyecto)
-16. [Datos que guarda la app](#datos-que-guarda-la-app)
-17. [Decisiones técnicas](#decisiones-técnicas)
-18. [Limitaciones y trabajo pendiente](#limitaciones-y-trabajo-pendiente)
-19. [Uso de IA](#uso-de-ia)
-20. [Entrega y autor](#entrega-y-autor)
+8. [Cobro con tarjeta (Stripe, modo de prueba)](#cobro-con-tarjeta-stripe-modo-de-prueba)
+9. [Cómo aprobar a un conductor](#cómo-aprobar-a-un-conductor)
+10. [Cómo funciona la app](#cómo-funciona-la-app)
+11. [Reglas de validación del registro](#reglas-de-validación-del-registro)
+12. [Disponibilidad y ubicación](#disponibilidad-y-ubicación)
+13. [Flujo del viaje](#flujo-del-viaje)
+14. [Ganancias, historial y perfil](#ganancias-historial-y-perfil)
+15. [Herramientas de desarrollo](#herramientas-de-desarrollo)
+16. [Estructura del proyecto](#estructura-del-proyecto)
+17. [Datos que guarda la app](#datos-que-guarda-la-app)
+18. [Decisiones técnicas](#decisiones-técnicas)
+19. [Limitaciones y trabajo pendiente](#limitaciones-y-trabajo-pendiente)
+20. [Uso de IA](#uso-de-ia)
+21. [Entrega y autor](#entrega-y-autor)
 
 ## Estado del proyecto
 
@@ -42,7 +43,7 @@ Funcionalidades principales del taller (sección 1 del enunciado):
 | 2 | Cambio de estado Disponible / No disponible y envío de la ubicación en tiempo real | Hecho |
 | 3 | Recepción de solicitudes con tiempo límite para aceptar o rechazar | Hecho (con solicitudes simuladas hasta que exista la app del pasajero) |
 | 4 | Navegación al punto de recogida y al destino con Google Directions API (se usa OpenRouteService en su lugar) | Hecho |
-| 5 | Cobro del viaje con Mercado Pago o Stripe en modo de prueba, y pago en efectivo | Efectivo hecho; la pasarela de pagos está pendiente |
+| 5 | Cobro del viaje con Stripe en modo de prueba (servidor local en `server/`), y pago en efectivo | Hecho |
 | 6 | Cálculo de tarifa, comisión y ganancia neta (`calculateFare`, `src/config/pricing.js`) | Hecho |
 | 7 | Historial de carreras con filtros y resumen de ganancias | Hecho |
 | 8 | Navegación combinada: Stack, Tabs y Drawer | Hecha |
@@ -54,14 +55,14 @@ Pantallas del conductor (sección 3):
 | Inicio (mapa e interruptor Disponible / No disponible) | Hecha |
 | Solicitud entrante | Hecha |
 | Viaje en curso | Hecha |
-| Cobro y resumen del viaje | Hecha para efectivo; con pasarela queda en Pendiente |
+| Cobro y resumen del viaje | Hecha: efectivo y tarjeta (Stripe) |
 | Ganancias | Hecha |
 | Historial de carreras (con detalle y ruta en el mapa) | Hecha |
 | Perfil y configuración | Hecha: celular, correo, documentos e idioma editables; vehículo en solo lectura |
 
 Además existen: pantalla de carga, inicio de sesión y menú lateral (Drawer).
 
-Pendiente del enunciado: la pasarela de pagos (Mercado Pago o Stripe) y las notificaciones push
+Pendiente del enunciado: las notificaciones push
 (ver [Limitaciones y trabajo pendiente](#limitaciones-y-trabajo-pendiente)).
 
 ## Tecnologías
@@ -72,6 +73,8 @@ Pendiente del enunciado: la pasarela de pagos (Mercado Pago o Stripe) y las noti
   transacciones y consultas de agregación.
 - **Cloudinary**: almacenamiento de las fotos (perfil, vehículo y documentos).
 - **OpenRouteService**: distancia, duración y ruta de los viajes (datos de OpenStreetMap).
+- **Stripe** (modo de prueba): `@stripe/stripe-react-native` (hoja de pago, incluida en Expo Go) y un
+  servidor local en `server/` con Node.js, Express y el SDK `stripe`.
 - `react-native-maps`: mapa del conductor y de los viajes.
 - `expo-location`: permiso y lectura de la ubicación.
 - `@react-native-async-storage/async-storage`: sesión y preferencias.
@@ -139,15 +142,16 @@ El archivo `.env` **no se sube a Git** (está en `.gitignore`). El repositorio i
 | `EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME` | Nombre de tu cuenta de Cloudinary | Panel de Cloudinary |
 | `EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | Nombre del *upload preset* sin firma | Ver [Configuración de Cloudinary](#configuración-de-cloudinary) |
 | `EXPO_PUBLIC_ORS_API_KEY` | Llave de OpenRouteService para las rutas del viaje; opcional | Panel de [OpenRouteService](https://account.heigit.org/signup) → *Request a token* (plan gratuito Standard) |
+| `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Llave **publicable** de Stripe (`pk_test_…`); es pública por diseño | Panel de Stripe (modo de prueba) → *Developers → API keys* |
+| `EXPO_PUBLIC_PAYMENTS_API_URL` | Dirección del servidor de pagos, por ejemplo `http://192.168.1.3:3001` | La imprime el servidor al arrancar (ver [Cobro con tarjeta](#cobro-con-tarjeta-stripe-modo-de-prueba)) |
 
 Notas de seguridad:
 
 - Las variables con prefijo `EXPO_PUBLIC_` quedan dentro del paquete de la app. Por eso aquí solo
   van valores que no son secretos (la configuración web de Firebase y el nombre de cuenta y
   preset de Cloudinary).
-- **Nunca** se guardan en la app la clave secreta (`API Secret`) de Cloudinary, los
-  `access_token` de Mercado Pago ni la `secret key` de Stripe. Cuando se implemente el pago irán
-  solo en un backend, en un `.env` excluido de Git.
+- **Nunca** se guardan en la app la clave secreta (`API Secret`) de Cloudinary ni la `secret key`
+  de Stripe (`sk_test_…`). La de Stripe va solo en `server/.env`, excluido de Git.
 - Solo se usan credenciales de prueba.
 - El mapa funciona en Expo Go sin ninguna clave. `EXPO_PUBLIC_ORS_API_KEY` sirve únicamente
   para calcular distancia, duración y ruta del viaje con OpenRouteService (ver
@@ -214,6 +218,46 @@ un plan de pago). No hace falta instalar nada adicional:
 
 Las imágenes se guardan con una ruta tipo `drivers/<id del conductor>/<foto>`, y la URL que
 devuelve Cloudinary es la que se guarda en Firestore. **No** pongas el API Secret en la app.
+
+## Cobro con tarjeta (Stripe, modo de prueba)
+
+El cobro de los viajes `stripe` pasa por un servidor local en la carpeta `server/` (Node.js y
+Express), como pide el taller. La app nunca decide si un pago fue aprobado: el servidor consulta el
+cobro a Stripe, comprueba que sea de ese viaje, por ese monto y en pesos colombianos, y solo
+entonces actualiza el viaje en Firestore. No usa webhooks, túnel ni servicios de Google Cloud.
+
+```
+App (hoja de pago de Stripe)  <->  servidor local (http://<IP>:3001)  <->  Stripe y Firestore
+```
+
+Pasos para probarlo (Expo Go y el computador deben estar en la **misma red Wi-Fi**):
+
+1. En el panel de Stripe, en **modo de prueba**, copia la clave publicable (`pk_test_…`) y la
+   secreta (`sk_test_…`). Solo se usan llaves de prueba; el servidor rechaza cualquier otra.
+2. Crea `server/.env` a partir de `server/.env.example` y escribe `STRIPE_SECRET_KEY=sk_test_…`.
+   Los datos públicos de Firebase los toma del `.env` de la raíz si no los pones ahí.
+3. En el `.env` de la raíz agrega `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_…` y
+   `EXPO_PUBLIC_PAYMENTS_API_URL=http://<IP del computador>:3001`.
+4. Arranca el servidor: `cd server`, `npm install` y `npm start`. Al iniciar imprime las
+   direcciones posibles; usa la de tu red Wi-Fi.
+5. Comprueba desde el navegador del celular que `http://<IP>:3001/health` responda `{"ok":true}`.
+6. Reinicia la app con `npx expo start -c`.
+
+Si Windows pregunta por el cortafuegos, permite Node.js en **redes privadas**. La IP del
+computador puede cambiar si cambias de red; entonces hay que actualizar la variable y reiniciar.
+
+Prueba: en **Ganancias** usa *Simular solicitud (pasarela)* (crea un viaje `stripe`), acéptalo,
+finalízalo y toca **Pagar con tarjeta** en el resumen. Tarjetas de prueba de Stripe (cualquier
+fecha futura, cualquier CVC y código postal):
+
+| Tarjeta | Resultado |
+|---|---|
+| `4242 4242 4242 4242` | Pago aprobado |
+| `4000 0000 0000 0002` | Rechazada |
+| `4000 0000 0000 9995` | Rechazada por fondos insuficientes |
+
+No se usan las tarjetas que exigen 3D Secure. Sin las dos variables de la app, el resumen conserva
+los botones de simulación de desarrollo.
 
 ## Cómo aprobar a un conductor
 
@@ -353,8 +397,10 @@ qué pantalla se muestra: `requested` → `accepted` → `driver_arriving` → `
    ganancia neta y el estado del pago (Aprobado, Pendiente, Rechazado o Efectivo).
    - **Efectivo:** el conductor toca **Cobro recibido en efectivo** y el viaje pasa a `paid`; la
      comisión se descuenta del saldo.
-   - **Mercado Pago o Stripe:** todavía no hay pasarela, así que el viaje queda `completed` con el
-     pago **Pendiente** y se ve en el historial con ese estado.
+   - **Stripe (tarjeta):** el conductor toca **Pagar con tarjeta**, escribe una tarjeta de prueba en
+     la hoja de pago de Stripe y el servidor confirma el resultado. Aprobado: el viaje pasa a `paid`.
+     Rechazado: el viaje sigue `completed` con el pago **Rechazado** y se puede reintentar. Si el
+     servidor de pagos no está configurado, el viaje queda `completed` con el pago **Pendiente**.
 
 Reglas importantes:
 
@@ -428,8 +474,8 @@ existen):
   distintos métodos y estados de pago), *Borrar viajes de ejemplo* (borra solo los marcados) y
   *Simular solicitud* en efectivo o con pasarela, que crea una solicitud para el conductor. Para
   recibirla hay que estar aprobado y Disponible.
-- En el **resumen de un viaje con pasarela**: *Simular pago aprobado* y *Simular pago rechazado*,
-  que hacen el trabajo que haría el backend de la pasarela.
+- En el **resumen de un viaje con pasarela**, solo si el servidor de pagos no está configurado:
+  *Simular pago aprobado* y *Simular pago rechazado*, que hacen el trabajo que haría el servidor.
 
 Cuando exista la app del pasajero, las solicitudes simuladas dejan de ser necesarias; sus botones
 se pueden retirar sin afectar el resto del flujo.
@@ -438,6 +484,7 @@ se pueden retirar sin afectar el resto del flujo.
 
 ```
 App.js                      Providers y punto de entrada
+server/                     Servidor local de pagos (Stripe): src/, scripts/probe.js, .env.example
 app.json                    Configuración de Expo (incluye el plugin de expo-location)
 .env.example                Nombres de las variables de entorno (sin valores)
 assets/                     Íconos y las imágenes del auto (car_icon.png, @2x y @3x)
@@ -448,7 +495,7 @@ src/
                             profile/   secciones del perfil (datos, vehículo, documentos, idioma)
                             earnings/  tarjetas de saldo y de periodos
                             history/   filtros y elementos del historial
-                            trip/      mapa del viaje y atribución de la ruta
+                            trip/      mapa del viaje, atribución de la ruta y botón Pagar con tarjeta
   config/                   firebaseConfig, pricing (tarifas y comisión) y tripFlow (tiempos del viaje)
   context/                  LanguageContext, RegistrationContext, SessionContext, TripContext
   data/                     Opciones de listas (género, idioma, categoría, color, método de pago)
@@ -460,7 +507,7 @@ src/
   screens/                  Registro (3), Login, Carga, Inicio, Ganancias, Historial, Detalle del
                             viaje, Perfil, Solicitud entrante, Viaje en curso y Resumen del viaje
   services/                 driverServices (conductor), tripServices (viajes), routesServices
-                            (rutas) y storageServices (Cloudinary)
+                            (rutas), paymentsServices (servidor de pagos) y storageServices (Cloudinary)
   theme/                    theme.js (colores, espaciados, tipografía, sombras)
   utils/                    validators, buildDriver, calculateFare, tripStateMachine, dateRanges,
                             earningsSummary, polyline, profileMappers, formatCurrency y demoTrips
@@ -482,7 +529,7 @@ Mercado Pago, con las URL de las fotos y las fechas de vencimiento), `status`
 
 **Firestore, colección `trips`** (un documento por viaje): `driverId`, `passengerId`, `origin` y
 `destination` (`lat`, `lng`, `address`), `category`, `distanceKm`, `durationMin`, `paymentMethod`
-(`mercadopago`, `stripe` o `cash`), `paymentStatus` (`approved`, `pending`, `rejected` o `cash`),
+(`stripe` o `cash`), `paymentStatus` (`approved`, `pending`, `rejected` o `cash`),
 `paymentId`, `status` (los siete estados del viaje, más `rejected`), `fare`, `commission`, `tip`,
 `driverEarnings` y `commissionRate` (pesos enteros), `rating`, `route` (polilínea codificada de
 hasta 100 puntos, o `null`), las marcas de tiempo de cada paso (`createdAt`, `acceptedAt`,
@@ -554,15 +601,26 @@ No se guardan números de cuenta bancaria ni de tarjeta, ni en la app ni en Asyn
   recomienda el enunciado. Cuando se dibuja una ruta se muestra la atribución
   "© OpenStreetMap contributors". Todo el acceso está aislado en `src/services/routesServices.js`:
   para cambiar de proveedor (Google, OSRM...) solo hay que reescribir ese archivo.
+- **Stripe con un servidor local, en lugar de Mercado Pago.** Se descartó Mercado Pago porque su
+  cuenta de pruebas y el retorno a la app eran inciertos en Expo Go. Stripe tiene una hoja de pago
+  incluida en Expo Go, y el taller exige un backend para guardar la llave secreta. El monto sale
+  siempre del viaje en Firestore y no de la app; el cobro es en COP (moneda de dos decimales:
+  19.200 COP se envía como `1920000`) y solo con tarjeta; cada toque del botón usa una clave de
+  idempotencia para no duplicar cobros; una tarjeta rechazada deja abierta la hoja de pago, por eso
+  el estado Rechazado se deduce del último error del cobro y no de la hoja. El servidor usa el SDK
+  web de Firebase con la misma configuración pública de la app y solo escribe los campos del
+  resultado del pago.
 - **Dependencias del Drawer:** `react-native-reanimated`, `react-native-worklets` y
   `react-native-gesture-handler` son requisitos de `@react-navigation/drawer`; no se usan
   directamente.
 
 ## Limitaciones y trabajo pendiente
 
-- **Pasarela de pagos pendiente.** Mercado Pago o Stripe en modo de prueba exigen un backend
-  (Node.js/Express o Cloud Functions) que guarde la llave secreta y confirme el pago. Mientras
-  tanto, un viaje que no es en efectivo queda `completed` con el pago Pendiente.
+- **El servidor de pagos es solo para pruebas en red local:** no tiene autenticación (igual que el
+  resto del proyecto, que no usa Firebase Authentication), no usa HTTPS ni webhooks, y debe estar
+  encendido en el computador, en la misma red Wi-Fi que el celular. Solo admite llaves `sk_test_`.
+  Quedan fuera 3D Secure, Apple Pay y Google Pay (no funcionan en Expo Go), reembolsos y guardar
+  tarjetas.
 - **Notificaciones push pendientes** (Firebase Cloud Messaging), que requieren un *development
   build* y no funcionan en Expo Go.
 - **La app del pasajero la entregará la profesora.** Hasta entonces las solicitudes se simulan

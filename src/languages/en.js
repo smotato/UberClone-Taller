@@ -227,7 +227,6 @@ export default {
     periodCustom: 'Range',
     paymentAll: 'All',
     paymentCash: 'Cash',
-    paymentMercadoPago: 'Mercado Pago',
     paymentStripe: 'Stripe',
     from: 'From',
     to: 'To',
@@ -302,6 +301,18 @@ export default {
     collectCash: 'Cash payment received',
     waitingGateway: 'Waiting for the payment gateway to confirm.',
     backHome: 'Back to home',
+  },
+  // AI-assisted: see docs/AI_LOG.md #29
+  // Card payment (Stripe)
+  payment: {
+    payWithCard: 'Pay with card',
+    processing: 'Processing the payment...',
+    rejected: 'The payment was declined. You can try again.',
+    pending: 'The payment is not confirmed yet. Try again in a moment.',
+    serverUnreachable: "We couldn't reach the payments server. Check that it is running and that you are on the same Wi-Fi network.",
+    providerError: "We couldn't process the payment. Please try again.",
+    notPayable: 'This trip cannot be charged by card.',
+    merchantName: 'UberClone',
   },
   // AI-assisted: see docs/AI_LOG.md #25
   // Development only: testing tools without the passenger app

@@ -11,6 +11,10 @@ import { InfoRow } from '../components/profile/ProfileInfo'
 import { PAYMENT_STATUS_STYLES } from '../components/history/TripItem'
 import { formatCurrency } from '../utils/formatCurrency'
 import { PAYMENT_METHOD_OPTIONS } from '../data/options'
+// AI-assisted: see docs/AI_LOG.md #29
+import { StripeProvider } from '@stripe/stripe-react-native'
+import PayWithCardButton from '../components/trip/PayWithCardButton'
+import { isPaymentsConfigured, STRIPE_PUBLISHABLE_KEY } from '../services/paymentsServices'
 
 // Espera para que el overlay termine de ocultarse antes de mostrar el Alert (en iOS una alerta no aparece sobre un Modal abierto)
 const ALERT_DELAY_MS = 400
@@ -56,6 +60,9 @@ export default function TripSummaryScreen() {
   const statusStyle = PAYMENT_STATUS_STYLES[trip.paymentStatus] ?? PAYMENT_STATUS_STYLES.cash
   const methodOption = PAYMENT_METHOD_OPTIONS.find((option) => option.value === trip.paymentMethod)
   // La comisión se muestra con el porcentaje guardado en el viaje
+  // AI-assisted: see docs/AI_LOG.md #29
+  // Con Stripe y el servidor de pagos configurado, el cobro es con tarjeta; si no, queda la simulación de desarrollo
+  const useCardPayment = trip.paymentMethod === 'stripe' && isPaymentsConfigured
   const rate = typeof trip.commissionRate === 'number' ? ` (${Math.round(trip.commissionRate * 100)}%)` : ''
 
   return (
@@ -85,7 +92,7 @@ export default function TripSummaryScreen() {
         </View>
 
         {/* Con pasarela y sin confirmación: aviso de espera */}
-        {!isCash && !isPaid ? <Text style={styles.waiting}>{t('tripSummary.waitingGateway')}</Text> : null}
+        {!isCash && !isPaid && !useCardPayment ? <Text style={styles.waiting}>{t('tripSummary.waitingGateway')}</Text> : null}
       </ScrollView>
 
       <View style={[styles.actions, { paddingBottom: insets.bottom + spacing.lg }]}>
@@ -101,8 +108,16 @@ export default function TripSummaryScreen() {
           </Pressable>
         ) : null}
 
-        {/* Solo desarrollo: simula la respuesta de la pasarela, que todavía no existe */}
-        {__DEV__ && !isCash && !isPaid ? (
+        {/* AI-assisted: see docs/AI_LOG.md #29 */}
+        {/* Tarjeta (Stripe): la hoja de pago de Stripe; el resultado lo confirma el servidor de pagos */}
+        {useCardPayment && trip.status === 'completed' ? (
+          <StripeProvider publishableKey={STRIPE_PUBLISHABLE_KEY}>
+            <PayWithCardButton />
+          </StripeProvider>
+        ) : null}
+
+        {/* Solo desarrollo: simula la respuesta de la pasarela cuando no hay servidor de pagos */}
+        {__DEV__ && !isCash && !isPaid && !useCardPayment ? (
           <>
             <Pressable style={[styles.secondaryButton, busy && styles.disabled]} onPress={() => handleSimulate(true)} disabled={busy} accessibilityRole="button">
               <Text style={styles.secondaryText}>{t('dev.simulateApproved')}</Text>

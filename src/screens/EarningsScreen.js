@@ -136,7 +136,8 @@ export default function EarningsScreen() {
           </Pressable>
           <Pressable
             style={[styles.demoButton, demoBusy && styles.demoButtonDisabled]}
-            onPress={() => handleSimulateRequest('mercadopago')}
+            // AI-assisted: see docs/AI_LOG.md #29
+            onPress={() => handleSimulateRequest('stripe')}
             disabled={demoBusy}
             accessibilityRole="button"
           >
